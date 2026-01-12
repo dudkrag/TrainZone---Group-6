@@ -2,3 +2,7 @@
 
 Mobile health application to support professional football players with real-time
 physiological feedback and post-training performance analysis.
+
+
+
+User story -> feature -> classes model -> viewmodel -> view
