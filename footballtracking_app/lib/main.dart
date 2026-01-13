@@ -2,11 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:mdsflutter/Mds.dart';
-import 'package:mdsflutter/gen/protos/mdsflutter.pb.dart';
-import 'package:mdsflutter/gen/protos/mdsflutter.pbenum.dart';
-import 'package:mdsflutter/gen/protos/mdsflutter.pbjson.dart';
-import 'package:mdsflutter/gen/protos/mdsflutter.pbserver.dart';
-import 'package:mdsflutter/internal/MdsImpl.dart';
 
 void main() => runApp(const HRApp());
 
