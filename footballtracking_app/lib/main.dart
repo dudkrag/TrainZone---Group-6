@@ -1,4 +1,11 @@
+library football_tracking_app;
 import 'package:flutter/material.dart';
+
+
+part 'Model/coach.dart';
+part 'Model/player.dart';
+part 'Model/sensor_state.dart';
+
 
 void main() {
   runApp(const MyApp());
