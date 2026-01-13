@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:mdsflutter/Mds.dart';
-
+import 'package:mdsflutter/gen/protos/mdsflutter.pb.dart';
+import 'package:mdsflutter/gen/protos/mdsflutter.pbenum.dart';
+import 'package:mdsflutter/gen/protos/mdsflutter.pbjson.dart';
+import 'package:mdsflutter/gen/protos/mdsflutter.pbserver.dart';
+import 'package:mdsflutter/internal/MdsImpl.dart';
 void main() => runApp(const HRApp());
 
 /// Heart Rate Monitor app kun for Movesense.
@@ -205,11 +209,7 @@ class MovesenseHRMonitor extends StatefulHRMonitor {
         state = DeviceState.connected;
       },
       () => state = DeviceState.disconnected,
-      (error) {
-        // error-parameter kræves af Mds.connect-signaturen
-        print('Connection error: $error');
-        state = DeviceState.error;
-      },
+      () => state = DeviceState.error,
     );
   }
 
