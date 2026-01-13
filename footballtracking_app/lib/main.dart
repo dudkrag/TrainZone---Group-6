@@ -1,125 +1,320 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:mdsflutter/Mds.dart';
+import 'package:mdsflutter/gen/protos/mdsflutter.pb.dart';
+import 'package:mdsflutter/gen/protos/mdsflutter.pbenum.dart';
+import 'package:mdsflutter/gen/protos/mdsflutter.pbjson.dart';
+import 'package:mdsflutter/gen/protos/mdsflutter.pbserver.dart';
+import 'package:mdsflutter/internal/MdsImpl.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() => runApp(const HRApp());
+
+/// Heart Rate Monitor app kun for Movesense.
+class HRApp extends StatelessWidget {
+  const HRApp({super.key});
+
+  @override
+  Widget build(BuildContext context) => const MaterialApp(home: HRHomePage());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class HRHomePage extends StatefulWidget {
+  const HRHomePage({super.key});
 
-  // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a blue toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+  State<HRHomePage> createState() => _HRHomePageState();
+}
+
+class _HRHomePageState extends State<HRHomePage> {
+  // SÆT DIN EGEN MOVESENSE-ADRESSE HER:
+  final HRMonitor monitor = MovesenseHRMonitor('0C:8C:DC:3F:B2:CD');
+
+  @override
+  void initState() {
+    super.initState();
+    monitor.init();
   }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  void dispose() {
+    monitor.stop();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
+      appBar: AppBar(title: const Text('Heart Rate Monitor (Movesense)')),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            StreamBuilder<DeviceState>(
+              stream: monitor.stateChange,
+              builder: (context, snapshot) => Text(
+                'Device [${monitor.identifier}] - ${monitor.state.name}',
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            const SizedBox(height: 16),
+            const Text('Din puls er:'),
+            StreamBuilder<int>(
+              stream: monitor.heartbeat,
+              builder: (context, snapshot) {
+                var displayText = 'ukendt';
+                if (snapshot.hasData) displayText = '${snapshot.data}';
+                return Text(
+                  displayText,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                );
+              },
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+        onPressed: () {
+          if (monitor.isRunning) {
+            monitor.stop();
+          } else {
+            monitor.start();
+          }
+          setState(() {});
+        },
+        tooltip: 'Start/Stop HR Monitor',
+        child: StreamBuilder<DeviceState>(
+          stream: monitor.stateChange,
+          builder: (context, snapshot) =>
+              (monitor.isRunning) ? const Icon(Icons.stop) : const Icon(Icons.play_arrow),
+        ),
+      ),
     );
+  }
+}
+
+/// A Heart Rate (HR) Monitor interface.
+abstract class HRMonitor {
+  String get identifier;
+  DeviceState get state;
+  Stream<DeviceState> get stateChange;
+  Stream<int> get heartbeat;
+  bool get isRunning;
+
+  Future<void> init();
+  void start();
+  void stop();
+}
+
+/// An enumeration of known device states.
+enum DeviceState {
+  unknown,
+  initialized,
+  connecting,
+  connected,
+  sampling,
+  disconnected,
+  error,
+}
+
+/// A stateful Heart Rate (HR) Monitor where you can listen to [stateChange] events.
+abstract class StatefulHRMonitor implements HRMonitor {
+  StreamSubscription<dynamic>? _subscription;
+
+  // HR-data stream
+  final _controller = StreamController<int>.broadcast();
+
+  // State stream
+  final StreamController<DeviceState> _stateChangeController =
+      StreamController<DeviceState>.broadcast();
+  DeviceState _state = DeviceState.unknown;
+
+  set state(DeviceState state) {
+    print('The device with id $identifier is ${state.name}.');
+    _state = state;
+    _stateChangeController.add(state);
+  }
+
+  @override
+  DeviceState get state => _state;
+
+  @override
+  Stream<DeviceState> get stateChange => _stateChangeController.stream;
+
+  @override
+  Stream<int> get heartbeat => _controller.stream;
+
+  @override
+  @mustCallSuper
+  Future<void> init() async {
+    if (!(await hasPermissions)) await requestPermissions();
+  }
+
+  /// Do we have the required Bluetooth permissions?
+  Future<bool> get hasPermissions async =>
+      await Permission.bluetoothScan.isGranted &&
+      await Permission.bluetoothConnect.isGranted;
+
+  /// Request the required Bluetooth permissions.
+  Future<void> requestPermissions() async => await [
+        Permission.bluetooth,
+        Permission.bluetoothScan,
+        Permission.bluetoothConnect,
+      ].request();
+
+  @override
+  bool get isRunning => state == DeviceState.sampling;
+
+  /// Pause collection of HR data.
+  void pause() => _subscription?.pause();
+
+  /// Resume collection of HR data.
+  void resume() => _subscription?.resume();
+
+  @override
+  @mustCallSuper
+  void stop() {
+    _subscription?.cancel();
+    state = DeviceState.connected;
+  }
+}
+
+/// A Movesense Heart Rate (HR) Monitor.
+class MovesenseHRMonitor extends StatefulHRMonitor {
+  final String? _address, _name;
+  String? _serial;
+
+  @override
+  String get identifier => _address!;
+
+  /// The BLE address of the device.
+  String get address => _address!;
+
+  /// The name of the device.
+  String? get serial => _serial;
+
+  /// The serial number of the device.
+  String? get name => _name;
+
+  MovesenseHRMonitor(this._address, [this._name]);
+
+  @override
+  Future<void> init() async {
+    state = DeviceState.initialized;
+    await super.init();
+
+    // Start connecting to the Movesense device with the specified address.
+    state = DeviceState.connecting;
+    Mds.connect(
+      address,
+      (serial) {
+        _serial = serial;
+        state = DeviceState.connected;
+      },
+      () => state = DeviceState.disconnected,
+      (error) {
+        // error-parameter kræves af Mds.connect-signaturen
+        print('Connection error: $error');
+        state = DeviceState.error;
+      },
+    );
+  }
+
+  @override
+  @mustCallSuper
+  void start() {
+    if (state == DeviceState.connected && _serial != null) {
+      _subscription = MdsAsync.subscribe(
+        Mds.createSubscriptionUri(_serial!, "/Meas/HR"),
+        "{}",
+      ).listen((event) {
+        print('>> $event');
+        num hr = event["Body"]["average"];
+        _controller.add(hr.toInt());
+      });
+      state = DeviceState.sampling;
+    }
+  }
+
+  /// Disconnect from the Movesense device.
+  void disconnect() => Mds.disconnect(address);
+}
+
+enum BatteryState { low, normal }
+
+/// A Movesense Monitor med batteristatus.
+class MovesenseMonitor extends MovesenseHRMonitor {
+  MovesenseMonitor(super.address, [super.name]);
+
+  final StreamController<BatteryState> _batteryStateController =
+      StreamController<BatteryState>.broadcast();
+
+  /// A stream of battery status for this Movesense device.
+  Stream<BatteryState> get battery => _batteryStateController.stream;
+
+  @override
+  void start() {
+    super.start();
+
+    // Create a timer that asks for battery status on a regular basis.
+    Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_serial == null) return;
+      MdsAsync.get(
+        Mds.createSubscriptionUri(_serial!, "/System/States/1"),
+        "{}",
+      ).then((value) {
+        print('>> $value');
+        num binaryState = value["Body"]["content"];
+        BatteryState state =
+            (binaryState.toInt() == 1) ? BatteryState.normal : BatteryState.low;
+        _batteryStateController.add(state);
+      }).catchError((error) {
+        print('Error reading battery state: $error');
+      });
+    });
+  }
+}
+
+/// Controls a list of [devices] found during a [scan] operation.
+abstract interface class DeviceController {
+  /// The list of available monitors.
+  List<HRMonitor> get devices;
+
+  /// Is this controller scanning for devices?
+  bool get isScanning;
+
+  /// Start scanning for devices. Found devices are added to [devices].
+  void scan();
+}
+
+/// A [DeviceController] handling [MovesenseHRMonitor] devices.
+class MovesenseDeviceController implements DeviceController {
+  final List<MovesenseHRMonitor> _devices = [];
+  bool _isScanning = false;
+
+  @override
+  List<HRMonitor> get devices => _devices;
+
+  @override
+  bool get isScanning => _isScanning;
+
+  @override
+  void scan() {
+    try {
+      _isScanning = true;
+      Timer(const Duration(seconds: 60), () => stopScan());
+      Mds.startScan((name, address) {
+        var device = MovesenseHRMonitor(address, name);
+        print('Device found, address: $address');
+        if (!devices.contains(device)) {
+          devices.add(device);
+        }
+      });
+    } on Error {
+      print('Error during scanning');
+    }
+  }
+
+  void stopScan() {
+    _isScanning = false;
+    Mds.stopScan();
   }
 }
