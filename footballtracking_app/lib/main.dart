@@ -1,8 +1,9 @@
+// ignore_for_file: depend_on_referenced_packages
+
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:movesense_plus/movesense_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
-
-import 'movesense_manager.dart';
 
 void main() => runApp(const MovesenseApp());
 
@@ -10,9 +11,8 @@ class MovesenseApp extends StatelessWidget {
   const MovesenseApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(home: MovesenseHomePage());
-  }
+  Widget build(BuildContext context) =>
+      const MaterialApp(home: MovesenseHomePage());
 }
 
 class MovesenseHomePage extends StatefulWidget {
@@ -23,9 +23,13 @@ class MovesenseHomePage extends StatefulWidget {
 }
 
 class MovesenseHomePageState extends State<MovesenseHomePage> {
-  // DIN Movesense-adresse:
-  final MovesenseManager movesenseManager =
-      MovesenseManager(address: '0C:8C:DC:1B:23:61');
+  // BRUG DIN EGEN MOVESENSE-ADRESSE HER
+  final MovesenseDevice device =
+      MovesenseDevice(address: '4D6C3EBA-FE78-5EB9-AE44-933C604B17CF');
+
+  bool isSampling = false;
+  StreamSubscription<MovesenseHR>? hrSubscription;
+  StreamSubscription<MovesenseState>? stateSubscription;
 
   @override
   void initState() {
@@ -34,77 +38,92 @@ class MovesenseHomePageState extends State<MovesenseHomePage> {
   }
 
   Future<void> requestPermissions() async {
+    if (!mounted) return;
+
     await [
       Permission.bluetooth,
       Permission.bluetoothScan,
       Permission.bluetoothConnect,
-      // På nogle Android-versioner:
-      // Permission.locationWhenInUse,
+      Permission.locationWhenInUse,
     ].request();
-  }
-
-  void onButtonPressed() async {
-    await movesenseManager.toggleSampling(
-      onHeartRate: (hr) {
-        debugPrint('>> HR: ${hr.average}, R-R: ${hr.rr} ms');
-      },
-      onState: (state) {
-        debugPrint('>> State: ${state.toString()}');
-      },
-    );
-    if (mounted) setState(() {});
-  }
-
-  @override
-  void dispose() {
-    movesenseManager.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final icon = (!movesenseManager.isConnected)
-        ? const Icon(Icons.refresh) // connect
-        : (!movesenseManager.isSampling)
-            ? const Icon(Icons.play_arrow) // start sampling
-            : const Icon(Icons.stop); // stop sampling
-
     return Scaffold(
       appBar: AppBar(title: const Text('Movesense HR Monitor')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
+            // Viser connection-status
             StreamBuilder<DeviceConnectionStatus>(
-              stream: movesenseManager.connectionStatusStream,
-              builder: (context, snapshot) {
-                final status =
-                    snapshot.data?.name ?? movesenseManager.device.status.name;
-                return Text(
-                  'Movesense [${movesenseManager.address}] - $status',
-                  textAlign: TextAlign.center,
-                );
-              },
+              stream: device.statusEvents,
+              builder: (context, snapshot) =>
+                  Text('Movesense [${device.address}] - ${device.status.name}'),
             ),
             const SizedBox(height: 16),
             const Text('Heart rate:'),
+            // Viser HR (eller ... hvis der ingen data er endnu)
             StreamBuilder<MovesenseHR>(
-              stream: movesenseManager.hrStream,
-              builder: (context, snapshot) {
-                final hr = snapshot.data?.average;
-                return Text(
-                  hr?.toString() ?? '...',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                );
-              },
+              stream: device.hr,
+              builder: (context, snapshot) => Text(
+                snapshot.hasData ? '${snapshot.data?.average}' : '...',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: onButtonPressed,
-        child: icon,
+        child: (!device.isConnected)
+            ? const Icon(Icons.refresh)      // connect
+            : (!isSampling)
+                ? const Icon(Icons.play_arrow) // start HR
+                : const Icon(Icons.stop),      // stop HR
       ),
     );
+  }
+
+  /// Håndterer tryk på knappen: connect + start/stop HR-sampling.
+  void onButtonPressed() {
+    setState(() {
+      if (!device.isConnected) {
+        // Hvis ikke forbundet, så begynd at forbinde
+        device.connect();
+      } else {
+        // Hvis forbundet, kan vi hente info (valgfrit – mest til debug)
+        device.getDeviceInfo().then(
+          (info) => debugPrint('>> Product name: ${info?.productName}'),
+        );
+        device.getBatteryStatus().then(
+          (battery) => debugPrint('>> Battery level: ${battery.name}'),
+        );
+
+        // Start/stop HR-sampling
+        if (!isSampling) {
+          // Lyt på HR-streamen
+          hrSubscription = device.hr.listen((hr) {
+            debugPrint(
+              '>> Heart Rate: ${hr.average}, R-R Interval: ${hr.rr} ms',
+            );
+          });
+
+          // Eksempel på state-events (kan fjernes hvis du ikke bruger det)
+          stateSubscription = device
+              .getStateEvents(SystemStateComponent.tap)
+              .listen((state) {
+            debugPrint('>> State: ${state.toString()}');
+          });
+
+          isSampling = true;
+        } else {
+          hrSubscription?.cancel();
+          stateSubscription?.cancel();
+          isSampling = false;
+        }
+      }
+    });
   }
 }
