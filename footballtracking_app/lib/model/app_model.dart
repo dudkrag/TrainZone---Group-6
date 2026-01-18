@@ -124,7 +124,11 @@ class MovesenseManager {
 
   Future<void> disconnect() async {
     await _hrSub?.cancel();
-     _device?.disconnect();
+    _hrSub = null;
+
+    _device?.disconnect();
+    _device = null;
+
     batteryStatus = null;
   }
 

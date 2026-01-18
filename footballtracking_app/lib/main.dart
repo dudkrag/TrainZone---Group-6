@@ -18,17 +18,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    /// =========================
-    /// GLOBAL / MOCK DATA
-    /// =========================
-
     final TrainingRepository repository = TrainingRepository();
-
+ 
+    //example of user      - REMEMBER TO CHANGE HEREEEEEEE
     final Coach coach = Coach(
       id: 'coach1',
       name: 'Coach Ana',
     );
-
     final List<Player> allPlayers = [
       Player(
         id: 'player1',
@@ -48,16 +44,11 @@ class MyApp extends StatelessWidget {
       ),
     ];
 
-    /// =========================
-    /// CURRENT USER (PLAYER)
-    /// =========================
 
     final Player currentPlayer = allPlayers.first;
 
-    /// =========================
-    /// VIEWMODELS
-    /// =========================
-
+    
+         //should i move to viewmodel?
     final HomeViewModel homeViewModel = HomeViewModel(
       player: currentPlayer,
       movesense: MovesenseManager(),
@@ -70,10 +61,7 @@ class MyApp extends StatelessWidget {
       repository: repository,
     );
 
-    /// =========================
-    /// APP
-    /// =========================
-
+   
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'TrainZone',
@@ -84,25 +72,19 @@ class MyApp extends StatelessWidget {
 
       initialRoute: '/',
 
-      routes: {
-        /// =====================
-        /// WELCOME / LOGIN
-        /// =====================
+      routes: {  //login
+       
         '/': (context) => WelcomePage(
               homeViewModel: homeViewModel,
               coachViewModel: coachViewModel,
             ),
 
-        /// =====================
-        /// PLAYER HOME
-        /// =====================
+        
         '/home': (context) => HomePage(
               viewModel: homeViewModel,
             ),
 
-        /// =====================
-        /// COACH HOME
-        /// =====================
+        
         '/coach': (context) => CoachHomePage(
               viewModel: coachViewModel,
             ),

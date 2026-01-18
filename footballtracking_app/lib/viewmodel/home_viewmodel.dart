@@ -12,17 +12,13 @@ class HomeViewModel extends ChangeNotifier {
     required this.repository,
   });
 
-  /// =====================
-  /// SENSOR STATUS
-  /// =====================
+
   bool isConnecting = false;
   String? errorMessage;
   bool get isConnected => movesense.isConnected;
   String? get batteryStatus => movesense.batteryStatus;
 
-  /// =====================
-  /// LAST TRAINING SESSION
-  /// =====================
+  ///last training to HP
 
   TrainingSession? get lastSession {
   final sessions = repository.getSessionsByPlayer(player.id);
@@ -33,12 +29,7 @@ class HomeViewModel extends ChangeNotifier {
   return sessions.first;
 }
 
-
-  
-  // =======================
-  // CONNECTION LOGIC
-  // =======================
-
+  //logic for MS connection
   Future<void> connect() async {
     isConnecting = true;
     errorMessage = null;
