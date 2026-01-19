@@ -3,6 +3,7 @@ import '../viewmodel/home_viewmodel.dart';
 import '../viewmodel/history_viewmodel.dart';
 import '../viewmodel/training_viewmodel.dart';
 import '../viewmodel/settings_viewmodel.dart';
+import '../view/scan_page.dart';
 
 import 'settings_page.dart';
 import 'training_page.dart';
@@ -171,29 +172,20 @@ class HomePage extends StatelessWidget {
                         viewModel.isConnected
                             ? Icons.bluetooth_connected
                             : Icons.bluetooth_disabled,
-                        color: viewModel.isConnected
-                            ? Colors.green
-                            : Colors.red,
+                        color: viewModel.isConnected ? Colors.green : Colors.red,
                       ),
                       title: Text(
-                        viewModel.isConnected
-                            ? 'Movesense connected'
-                            : 'Movesense disconnected',
+                        viewModel.isConnected ? 'Movesense connected' : 'Movesense disconnected',
                       ),
-                      subtitle: viewModel.isConnected &&
-                              viewModel.batteryStatus != null
+                      subtitle: viewModel.isConnected && viewModel.batteryStatus != null
                           ? (() {
                               final isLowBattery =
-                                  viewModel.batteryStatus!
-                                          .toLowerCase() ==
-                                      'low';
+                                  viewModel.batteryStatus!.toLowerCase() == 'low';
 
                               return Text(
                                 'Battery: ${isLowBattery ? "LOW" : "OK"}',
                                 style: TextStyle(
-                                  color: isLowBattery
-                                      ? Colors.red
-                                      : Colors.green,
+                                  color: isLowBattery ? Colors.red : Colors.green,
                                   fontWeight: FontWeight.bold,
                                 ),
                               );
@@ -203,22 +195,21 @@ class HomePage extends StatelessWidget {
                           ? const SizedBox(
                               width: 24,
                               height: 24,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : ElevatedButton(
-                              onPressed: viewModel.isConnected
-                                  ? viewModel.disconnect
-                                  : viewModel.connect,
-                              child: Text(
-                                viewModel.isConnected
-                                    ? 'Disconnect'
-                                    : 'Connect',
-                              ),
+                          : _ActionButton(
+                              label: 'Connect',
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => const MovesenseHomePage(),
+                                  ),
+                                );
+                              },
                             ),
                     ),
                   ),
+
 
                   const SizedBox(height: 24),
 
