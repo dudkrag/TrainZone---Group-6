@@ -7,26 +7,37 @@ class GpsPoint {
   final double accuracy; // meters
   final DateTime timestamp;
 
+  /// meters/second (kan være 0 hvis ukendt)
+  final double speedMps;
+
   GpsPoint({
     required this.lat,
     required this.lon,
     required this.accuracy,
     required this.timestamp,
+    required this.speedMps,
   });
 
   factory GpsPoint.fromPosition(Position p) {
+    // timestamp kan i nogle tilfælde være null afhængigt af platform/config
+    final ts = p.timestamp ?? DateTime.now();
+
+    final spd = (p.speed.isNaN || p.speed < 0) ? 0.0 : p.speed;
+
     return GpsPoint(
       lat: p.latitude,
       lon: p.longitude,
       accuracy: p.accuracy,
-      timestamp: p.timestamp,
+      timestamp: ts,
+      speedMps: spd,
     );
   }
 }
 
 class GpsModel {
   StreamSubscription<Position>? _sub;
-  final StreamController<GpsPoint> _controller = StreamController<GpsPoint>.broadcast();
+  final StreamController<GpsPoint> _controller =
+      StreamController<GpsPoint>.broadcast();
 
   bool get isTracking => _sub != null;
   Stream<GpsPoint> get stream => _controller.stream;
@@ -75,7 +86,8 @@ class GpsModel {
 
     await stop();
 
-    _sub = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
+    _sub = Geolocator.getPositionStream(locationSettings: locationSettings)
+        .listen(
       (pos) {
         _controller.add(GpsPoint.fromPosition(pos));
       },

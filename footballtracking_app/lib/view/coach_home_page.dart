@@ -1,54 +1,51 @@
 import 'package:flutter/material.dart';
-import '../viewmodel/coach_viewmodel.dart';
 import '../viewmodel/coach_player_viewmodel.dart';
-import 'coach_playerData_page.dart';
 
-class CoachHomePage extends StatelessWidget {
-  final CoachViewModel viewModel;
+class CoachPlayerDetailPage extends StatelessWidget {
+  final CoachPlayerViewModel viewModel;
 
-  const CoachHomePage({
+  const CoachPlayerDetailPage({
     Key? key,
     required this.viewModel,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final players = viewModel.playersOfCoach;
+    final sessions = viewModel.sessions;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Coach Dashboard'),
+        title: Text(viewModel.player.name),
       ),
-      body: players.isEmpty
+      body: sessions.isEmpty
           ? const Center(
-              child: Text('No associated player '),
+              child: Text('No registered training'),
             )
           : ListView.builder(
-              itemCount: players.length,
+              itemCount: sessions.length,
               itemBuilder: (context, index) {
-                final player = players[index];
+                final s = sessions[index];
+
+                final avgSpeedText = s.avgSpeedKmh == null
+                    ? '--'
+                    : s.avgSpeedKmh!.toStringAsFixed(1);
 
                 return Card(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   child: ListTile(
-                    leading: const Icon(Icons.person),
-                    title: Text(player.name),
-                    subtitle: Text(player.position),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => CoachPlayerDetailPage(
-                            viewModel: CoachPlayerViewModel(
-                              player: player,
-                              repository: viewModel.repository,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
+                    title: Text(
+                      'Avg HR: ${s.avgHr.toStringAsFixed(1)} bpm',
+                    ),
+
+                    /// UPDATED subtitle (duration + date + avg speed)
+                    subtitle: Text(
+                      'Duration: ${s.duration.inMinutes} min\n'
+                      'Date: ${s.date.day}/${s.date.month}/${s.date.year}\n'
+                      'Avg speed: $avgSpeedText km/h',
+                    ),
                   ),
                 );
               },

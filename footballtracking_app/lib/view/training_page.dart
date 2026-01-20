@@ -117,7 +117,16 @@ class _TrainingPageState extends State<TrainingPage> {
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
-                        ),
+                        ),  
+                        
+                        const SizedBox(height: 6),
+                        Text(
+                          '${widget.viewModel.currentSpeedKmh.toStringAsFixed(1)} km/h',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),  
 
                         const SizedBox(height: 8),
                         Text(

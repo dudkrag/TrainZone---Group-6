@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:movesense_plus/movesense_plus.dart';
 
-//users
+/// =========================
+/// USERS
+/// =========================
 class Player {
   final String id;
   String name;
@@ -44,7 +46,9 @@ class Coach {
   });
 }
 
-//zoner
+/// =========================
+/// ZONES
+/// =========================
 enum TrainingZone {
   low,
   ideal,
@@ -72,13 +76,8 @@ class TrainingLogic {
 }
 
 /// =========================
-/// GPS
+/// TRAINING DATA
 /// =========================
-/// GPS tracking logic (stream/listener + distance calculation) lives in:
-///   lib/model/gps_model.dart
-/// The GPS result (distance) is stored per session below as [distanceMeters].
-
-// data of training
 class TrainingSession {
   final String playerId;
   final double avgHr;
@@ -89,6 +88,11 @@ class TrainingSession {
   /// GPS distance in meters (optional)
   final double? distanceMeters;
 
+  /// NEW: speed metrics (optional)
+  /// Stored as meters/second for consistency
+  final double? avgSpeedMps;
+  final double? maxSpeedMps;
+
   TrainingSession({
     required this.playerId,
     required this.avgHr,
@@ -96,14 +100,21 @@ class TrainingSession {
     required this.date,
     required this.idealZonePercentage,
     this.distanceMeters,
+    this.avgSpeedMps,
+    this.maxSpeedMps,
   });
 
-  /// Convenience getter for UI
+  /// Convenience getters for UI
   double? get distanceKm =>
       distanceMeters == null ? null : distanceMeters! / 1000.0;
+
+  double? get avgSpeedKmh => avgSpeedMps == null ? null : avgSpeedMps! * 3.6;
+  double? get maxSpeedKmh => maxSpeedMps == null ? null : maxSpeedMps! * 3.6;
 }
 
-// save data training
+/// =========================
+/// SAVE TRAINING DATA
+/// =========================
 class TrainingRepository {
   final List<TrainingSession> _sessions = [];
 
@@ -116,8 +127,12 @@ class TrainingRepository {
   }
 }
 
+/// =========================
+/// MOVESENSE
+/// =========================
 class MovesenseManager {
   static const String macAddress = '0C:8C:DC:1B:23:1F';
+
   MovesenseDevice? _device;
   StreamSubscription<MovesenseHR>? _hrSub;
 

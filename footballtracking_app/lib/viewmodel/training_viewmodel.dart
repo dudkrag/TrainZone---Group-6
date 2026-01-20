@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../model/app_model.dart';
 import '../model/gps_model.dart';
 import '../model/calculate_distance.dart';
+import '../model/speed_calculator.dart';
 
 class TrainingViewModel extends ChangeNotifier {
   final Player player;
@@ -9,13 +10,18 @@ class TrainingViewModel extends ChangeNotifier {
   final TrainingRepository repository;
 
   /// =========================
-  /// GPS (stream + distance)
+  /// GPS (stream + distance + speed)
   /// =========================
   final GpsModel gps;
   late final CalculateDistance distanceCalculator;
+  late final SpeedCalculator speedCalculator;
 
   double get distanceMeters => distanceCalculator.state.totalDistanceMeters;
   double get distanceKm => distanceCalculator.state.totalDistanceKm;
+
+  double get currentSpeedKmh => speedCalculator.state.currentKmh;
+  double get avgSpeedKmh => speedCalculator.state.avgKmh;
+  double get maxSpeedKmh => speedCalculator.state.maxKmh;
 
   late final TrainingLogic logic;
 
@@ -41,6 +47,7 @@ class TrainingViewModel extends ChangeNotifier {
   }) {
     logic = TrainingLogic(player: player);
     distanceCalculator = CalculateDistance(gps: gps);
+    speedCalculator = SpeedCalculator(gps: gps);
   }
 
   /// =========================
@@ -56,14 +63,20 @@ class TrainingViewModel extends ChangeNotifier {
     _idealZoneTime = Duration.zero;
     _lastSampleTime = null;
 
-    // Reset distance
+    // Reset metrics
     distanceCalculator.reset();
+    speedCalculator.reset();
 
-    // Start GPS stream (stream-only GPS model)
+    // Start GPS stream
     gps.start();
 
-    // Start distance calculation (listens to gps.stream)
+    // Start distance calculation
     distanceCalculator.start((_) {
+      notifyListeners();
+    });
+
+    // Start speed calculation
+    speedCalculator.start((_) {
       notifyListeners();
     });
 
@@ -94,13 +107,13 @@ class TrainingViewModel extends ChangeNotifier {
     // Stop streams
     movesense.stopHrStream();
     distanceCalculator.stop();
+    speedCalculator.stop();
     gps.stop();
 
     isTraining = false;
 
     final duration = DateTime.now().difference(_startTime!);
 
-    // Avoid crash if no HR samples
     final avgHr = _hrSamples.isEmpty
         ? 0.0
         : _hrSamples.reduce((a, b) => a + b) / _hrSamples.length;
@@ -112,6 +125,8 @@ class TrainingViewModel extends ChangeNotifier {
       duration: duration,
       idealZonePercentage: idealZonePercentage,
       distanceMeters: distanceCalculator.state.totalDistanceMeters,
+      avgSpeedMps: speedCalculator.state.avgSpeedMps,
+      maxSpeedMps: speedCalculator.state.maxSpeedMps,
     );
 
     repository.addSession(lastSession!);

@@ -15,6 +15,14 @@ class SummaryPage extends StatelessWidget {
         ? '--'
         : '${session.distanceKm!.toStringAsFixed(2)} km';
 
+    final avgSpeedText = session.avgSpeedKmh == null
+        ? '--'
+        : '${session.avgSpeedKmh!.toStringAsFixed(1)} km/h';
+
+    final maxSpeedText = session.maxSpeedKmh == null
+        ? '--'
+        : '${session.maxSpeedKmh!.toStringAsFixed(1)} km/h';
+
     return Scaffold(
       appBar: AppBar(title: const Text('Training Summary')),
       body: Padding(
@@ -49,6 +57,25 @@ class SummaryPage extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(distanceText),
+
+            /// =========================
+            /// NEW: SPEED (inserted here)
+            /// =========================
+            const SizedBox(height: 16),
+
+            const Text(
+              'Avg speed:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(avgSpeedText),
+
+            const SizedBox(height: 16),
+
+            const Text(
+              'Max speed:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(maxSpeedText),
 
             const SizedBox(height: 32),
 
