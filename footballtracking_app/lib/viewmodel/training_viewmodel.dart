@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../model/app_model.dart';
+import 'package:vibration/vibration.dart';
 
 class TrainingViewModel extends ChangeNotifier {
   final Player player;
@@ -10,6 +11,7 @@ class TrainingViewModel extends ChangeNotifier {
 
   int? currentHr;
   TrainingZone? currentZone;
+  TrainingZone? lastZone;
 
   final List<int> _hrSamples = [];
   DateTime? _startTime;
@@ -17,8 +19,8 @@ class TrainingViewModel extends ChangeNotifier {
 
   TrainingSession? lastSession;
 
-  // 🔥 zona ideal
   Duration _totalTime = Duration.zero;
+  //ideal duration
   Duration _idealZoneTime = Duration.zero;
   DateTime? _lastSampleTime;
 
@@ -30,18 +32,17 @@ class TrainingViewModel extends ChangeNotifier {
     logic = TrainingLogic(player: player);
   }
 
-  /// =========================
-  /// TRAINING CONTROL
-  /// =========================
-
+  
   void startTraining() {
     _hrSamples.clear();
     _startTime = DateTime.now();
+    _lastSampleTime = null;
+    
     isTraining = true;
 
     _totalTime = Duration.zero;
     _idealZoneTime = Duration.zero;
-    _lastSampleTime = null;
+    
 
     movesense.startHrStream((hr) {
       final now = DateTime.now();
@@ -58,12 +59,39 @@ class TrainingViewModel extends ChangeNotifier {
       _lastSampleTime = now;
 
       currentHr = hr;
-      currentZone = logic.calculateZone(hr);
+      final newZone = logic.calculateZone(hr);
+
+      if (lastZone != null && newZone != lastZone) {
+          _vibrateForZone(newZone);
+      }
+
+      currentZone = newZone;
+      lastZone = newZone;
 
       _hrSamples.add(hr);
       notifyListeners();
     });
   }
+
+
+  Future<void> _vibrateForZone(TrainingZone zone) async {
+  if (!await (Vibration.hasVibrator())) return;
+
+  switch (zone) {
+    case TrainingZone.low:
+      Vibration.vibrate(duration: 2000);   // continuos vibration in 2s
+      break;
+
+    case TrainingZone.ideal:
+      Vibration.vibrate(duration: 600); // 1 kort vibration
+      break;
+
+    case TrainingZone.high:
+      Vibration.vibrate(pattern: [0, 300, 200, 300, 200, 300]); // 3 multiples and kort vibrations
+      break;
+  }
+}
+
 
   TrainingSession stopTraining() {
     movesense.stopHrStream();
@@ -87,10 +115,9 @@ class TrainingViewModel extends ChangeNotifier {
     return lastSession!;
   }
 
-  /// =========================
-  /// TIME HELPERS
-  /// =========================
 
+ 
+  //timer
   String get elapsedTimeFormatted {
     if (_startTime == null) return '00:00';
 
@@ -108,10 +135,8 @@ class TrainingViewModel extends ChangeNotifier {
         100;
   }
 
-  /// =========================
-  /// UI HELPERS
-  /// =========================
-
+  
+  //ZONE visual info
   String get zoneLabel {
     switch (currentZone) {
       case TrainingZone.low:
@@ -134,7 +159,7 @@ class TrainingViewModel extends ChangeNotifier {
       case TrainingZone.high:
         return Colors.red;
       default:
-        return Colors.grey;
+        return Colors.grey; // when the data isnt running yet, could mean the device is not connected or data is not beeing recorded
     }
   }
 }

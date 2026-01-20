@@ -106,8 +106,8 @@ class TrainingRepository {
 }
 
 
-class MovesenseManager {            //Controller
-  static const String macAddress = '0C:8C:DC:1B:23:1F';
+class MovesenseManager {            //Controller           - move to another file 
+  static const String macAddress = '0C:8C:DC:1B:23:1F';   //change here if we use Amins Movesense
   MovesenseDevice? _device;
   StreamSubscription<MovesenseHR>? _hrSub;
   String? batteryStatus;
@@ -115,19 +115,16 @@ class MovesenseManager {            //Controller
 
   Future<void> connect() async {
     _device = MovesenseDevice(address: macAddress);
-     _device!.connect();
+    _device!.connect();
 
     final battery = await _device!.getBatteryStatus();
     batteryStatus = battery.name;
   }
 
   Future<void> disconnect() async {
-    await _hrSub?.cancel();
-    _hrSub = null;
-
-    _device?.disconnect();
-    _device = null;
-
+    stopHrStream();              
+    _device?.disconnect();       
+    _device = null;                   
     batteryStatus = null;
   }
 
