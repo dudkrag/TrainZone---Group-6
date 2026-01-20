@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:movesense_plus/movesense_plus.dart';
 
-//users
+/// =========================
+/// USERS
+/// =========================
 class Player {
   final String id;
   String name;
@@ -44,14 +46,14 @@ class Coach {
   });
 }
 
-
-//zoner
+/// =========================
+/// ZONES
+/// =========================
 enum TrainingZone {
   low,
   ideal,
   high,
 }
-
 
 class TrainingLogic {
   final Player player;
@@ -73,7 +75,9 @@ class TrainingLogic {
   }
 }
 
-// data of training
+/// =========================
+/// TRAINING DATA
+/// =========================
 class TrainingSession {
   final String playerId;
   final double avgHr;
@@ -81,16 +85,41 @@ class TrainingSession {
   final DateTime date;
   final double idealZonePercentage;
 
+  /// GPS distance in meters (optional)
+  final double? distanceMeters;
+
+  /// NEW: speed metrics (optional)
+  /// Stored as meters/second for consistency
+  final double? avgSpeedMps;
+  final double? maxSpeedMps;
+
   TrainingSession({
     required this.playerId,
     required this.avgHr,
     required this.duration,
-    required this.date, required this.idealZonePercentage,
+    required this.date,
+    required this.idealZonePercentage,
+    this.distanceMeters,
+    this.avgSpeedMps,
+    this.maxSpeedMps,
   });
+
+  /// Convenience getters for UI
+  double? get distanceKm =>
+      distanceMeters == null ? null : distanceMeters! / 1000.0;
+
+  double? get avgSpeedKmh => avgSpeedMps == null ? null : avgSpeedMps! * 3.6;
+  double? get maxSpeedKmh => maxSpeedMps == null ? null : maxSpeedMps! * 3.6;
 }
 
+<<<<<<< HEAD
 
 // "save" data training, change to DataManager when implementing database. obs: store.record(xxx.id:xx.toJson());
+=======
+/// =========================
+/// SAVE TRAINING DATA
+/// =========================
+>>>>>>> calculate_speed
 class TrainingRepository {
   final List<TrainingSession> _sessions = [];
 
@@ -99,15 +128,22 @@ class TrainingRepository {
   }
 
   List<TrainingSession> getSessionsByPlayer(String playerId) {
-    return _sessions
-        .where((s) => s.playerId == playerId)
-        .toList();
+    return _sessions.where((s) => s.playerId == playerId).toList();
   }
 }
 
+<<<<<<< HEAD
 
 class MovesenseManager {            //Controller           - move to another file 
   static const String macAddress = '0C:8C:DC:1B:23:1F';   //change here if we use Amins Movesense
+=======
+/// =========================
+/// MOVESENSE
+/// =========================
+class MovesenseManager {
+  static const String macAddress = '0C:8C:DC:1B:23:1F';
+
+>>>>>>> calculate_speed
   MovesenseDevice? _device;
   StreamSubscription<MovesenseHR>? _hrSub;
   String? batteryStatus;
@@ -122,9 +158,14 @@ class MovesenseManager {            //Controller           - move to another fil
   }
 
   Future<void> disconnect() async {
+<<<<<<< HEAD
     stopHrStream();              
     _device?.disconnect();       
     _device = null;                   
+=======
+    await _hrSub?.cancel();
+    _device?.disconnect();
+>>>>>>> calculate_speed
     batteryStatus = null;
   }
 

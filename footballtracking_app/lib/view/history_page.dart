@@ -32,15 +32,23 @@ class HistoryPage extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final session = viewModel.history[index];
 
+                  final avgSpeedText = session.avgSpeedKmh == null
+                      ? '--'
+                      : session.avgSpeedKmh!.toStringAsFixed(1);
+
                   return Card(
                     child: ListTile(
                       leading: const Icon(Icons.fitness_center),
                       title: Text(
                         'Avg HR: ${session.avgHr.toStringAsFixed(1)} bpm',
                       ),
+
+                      /// ✅ UPDATED subtitle (duration + avg speed)
                       subtitle: Text(
-                        'Duration: ${session.duration.inMinutes} min',
+                        'Duration: ${session.duration.inMinutes} min\n'
+                        'Avg speed: $avgSpeedText km/h',
                       ),
+
                       trailing: Text(
                         _formatDate(session.date),
                         style: const TextStyle(fontSize: 12),

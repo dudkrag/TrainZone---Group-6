@@ -1,11 +1,31 @@
 import 'package:flutter/material.dart';
 import '../model/app_model.dart';
+<<<<<<< HEAD
 import 'package:vibration/vibration.dart';
+=======
+import '../model/gps_model.dart';
+import '../model/calculate_distance.dart';
+import '../model/speed_calculator.dart';
+>>>>>>> calculate_speed
 
 class TrainingViewModel extends ChangeNotifier {
   final Player player;
   final MovesenseManager movesense;
   final TrainingRepository repository;
+
+  /// =========================
+  /// GPS (stream + distance + speed)
+  /// =========================
+  final GpsModel gps;
+  late final CalculateDistance distanceCalculator;
+  late final SpeedCalculator speedCalculator;
+
+  double get distanceMeters => distanceCalculator.state.totalDistanceMeters;
+  double get distanceKm => distanceCalculator.state.totalDistanceKm;
+
+  double get currentSpeedKmh => speedCalculator.state.currentKmh;
+  double get avgSpeedKmh => speedCalculator.state.avgKmh;
+  double get maxSpeedKmh => speedCalculator.state.maxKmh;
 
   late final TrainingLogic logic;
 
@@ -19,6 +39,10 @@ class TrainingViewModel extends ChangeNotifier {
 
   TrainingSession? lastSession;
 
+<<<<<<< HEAD
+=======
+  // Ideal zone tracking
+>>>>>>> calculate_speed
   Duration _totalTime = Duration.zero;
   //ideal duration
   Duration _idealZoneTime = Duration.zero;
@@ -28,11 +52,20 @@ class TrainingViewModel extends ChangeNotifier {
     required this.player,
     required this.movesense,
     required this.repository,
+    required this.gps,
   }) {
     logic = TrainingLogic(player: player);
+    distanceCalculator = CalculateDistance(gps: gps);
+    speedCalculator = SpeedCalculator(gps: gps);
   }
 
+<<<<<<< HEAD
   
+=======
+  /// =========================
+  /// TRAINING CONTROL
+  /// =========================
+>>>>>>> calculate_speed
   void startTraining() {
     _hrSamples.clear();
     _startTime = DateTime.now();
@@ -44,6 +77,24 @@ class TrainingViewModel extends ChangeNotifier {
     _idealZoneTime = Duration.zero;
     
 
+    // Reset metrics
+    distanceCalculator.reset();
+    speedCalculator.reset();
+
+    // Start GPS stream
+    gps.start();
+
+    // Start distance calculation
+    distanceCalculator.start((_) {
+      notifyListeners();
+    });
+
+    // Start speed calculation
+    speedCalculator.start((_) {
+      notifyListeners();
+    });
+
+    // Start HR stream
     movesense.startHrStream((hr) {
       final now = DateTime.now();
 
@@ -94,12 +145,19 @@ class TrainingViewModel extends ChangeNotifier {
 
 
   TrainingSession stopTraining() {
+    // Stop streams
     movesense.stopHrStream();
+    distanceCalculator.stop();
+    speedCalculator.stop();
+    gps.stop();
+
     isTraining = false;
 
     final duration = DateTime.now().difference(_startTime!);
-    final avgHr =
-        _hrSamples.reduce((a, b) => a + b) / _hrSamples.length;
+
+    final avgHr = _hrSamples.isEmpty
+        ? 0.0
+        : _hrSamples.reduce((a, b) => a + b) / _hrSamples.length;
 
     lastSession = TrainingSession(
       playerId: player.id,
@@ -107,6 +165,9 @@ class TrainingViewModel extends ChangeNotifier {
       avgHr: avgHr,
       duration: duration,
       idealZonePercentage: idealZonePercentage,
+      distanceMeters: distanceCalculator.state.totalDistanceMeters,
+      avgSpeedMps: speedCalculator.state.avgSpeedMps,
+      maxSpeedMps: speedCalculator.state.maxSpeedMps,
     );
 
     repository.addSession(lastSession!);
@@ -115,28 +176,37 @@ class TrainingViewModel extends ChangeNotifier {
     return lastSession!;
   }
 
+<<<<<<< HEAD
 
  
   //timer
+=======
+  /// =========================
+  /// TIME HELPERS
+  /// =========================
+>>>>>>> calculate_speed
   String get elapsedTimeFormatted {
     if (_startTime == null) return '00:00';
 
     final diff = DateTime.now().difference(_startTime!);
     final minutes = diff.inMinutes.toString().padLeft(2, '0');
-    final seconds =
-        (diff.inSeconds % 60).toString().padLeft(2, '0');
+    final seconds = (diff.inSeconds % 60).toString().padLeft(2, '0');
     return '$minutes:$seconds';
   }
 
   double get idealZonePercentage {
     if (_totalTime.inMilliseconds == 0) return 0;
-    return (_idealZoneTime.inMilliseconds /
-            _totalTime.inMilliseconds) *
-        100;
+    return (_idealZoneTime.inMilliseconds / _totalTime.inMilliseconds) * 100;
   }
 
+<<<<<<< HEAD
   
   //ZONE visual info
+=======
+  /// =========================
+  /// UI HELPERS
+  /// =========================
+>>>>>>> calculate_speed
   String get zoneLabel {
     switch (currentZone) {
       case TrainingZone.low:

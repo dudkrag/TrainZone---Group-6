@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../viewmodel/coach_viewmodel.dart';
 import '../viewmodel/coach_player_viewmodel.dart';
 import 'coach_playerData_page.dart';
@@ -22,7 +21,7 @@ class CoachHomePage extends StatelessWidget {
       ),
       body: players.isEmpty
           ? const Center(
-              child: Text('No associated player '),
+              child: Text('No associated player'),
             )
           : ListView.builder(
               itemCount: players.length,
@@ -30,8 +29,7 @@ class CoachHomePage extends StatelessWidget {
                 final player = players[index];
 
                 return Card(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   child: ListTile(
                     leading: const Icon(Icons.person),
                     title: Text(player.name),

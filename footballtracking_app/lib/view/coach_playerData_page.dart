@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../viewmodel/coach_player_viewmodel.dart';
 
 class CoachPlayerDetailPage extends StatelessWidget {
