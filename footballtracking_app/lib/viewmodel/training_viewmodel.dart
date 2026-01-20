@@ -53,7 +53,6 @@ class TrainingViewModel extends ChangeNotifier {
   /// =========================
   /// TRAINING CONTROL
   /// =========================
-
   void startTraining() {
     _hrSamples.clear();
     _startTime = DateTime.now();
@@ -138,7 +137,6 @@ class TrainingViewModel extends ChangeNotifier {
   /// =========================
   /// TIME HELPERS
   /// =========================
-
   String get elapsedTimeFormatted {
     if (_startTime == null) return '00:00';
 
@@ -156,7 +154,6 @@ class TrainingViewModel extends ChangeNotifier {
   /// =========================
   /// UI HELPERS
   /// =========================
-
   String get zoneLabel {
     switch (currentZone) {
       case TrainingZone.low:

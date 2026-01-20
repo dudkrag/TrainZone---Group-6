@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-
 import 'model/app_model.dart';
 import 'model/gps_model.dart';
-
 import 'view/welcome_page.dart';
 import 'view/home_page.dart';
 import 'view/coach_home_page.dart';
-
 import 'viewmodel/home_viewmodel.dart';
 import 'viewmodel/coach_viewmodel.dart';
+
 
 void main() {
   runApp(const MyApp());
