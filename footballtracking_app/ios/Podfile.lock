@@ -1,0 +1,53 @@
+PODS:
+  - Flutter (1.0.0)
+  - geolocator_apple (1.2.0):
+    - Flutter
+    - FlutterMacOS
+  - mdsflutter (0.0.1):
+    - Flutter
+    - Movesense
+    - SwiftProtobuf
+  - Movesense (3.33.1)
+  - permission_handler_apple (9.3.0):
+    - Flutter
+  - SwiftProtobuf (1.33.3)
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - geolocator_apple (from `.symlinks/plugins/geolocator_apple/darwin`)
+  - mdsflutter (from `.symlinks/plugins/mdsflutter/ios`)
+  - Movesense (from `https://bitbucket.org/movesense/movesense-mobile-lib.git`)
+  - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+
+SPEC REPOS:
+  trunk:
+    - SwiftProtobuf
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  geolocator_apple:
+    :path: ".symlinks/plugins/geolocator_apple/darwin"
+  mdsflutter:
+    :path: ".symlinks/plugins/mdsflutter/ios"
+  Movesense:
+    :git: https://bitbucket.org/movesense/movesense-mobile-lib.git
+  permission_handler_apple:
+    :path: ".symlinks/plugins/permission_handler_apple/ios"
+
+CHECKOUT OPTIONS:
+  Movesense:
+    :commit: 4df9f7e709b5d6d606eb4f7b80bc4942e8540f07
+    :git: https://bitbucket.org/movesense/movesense-mobile-lib.git
+
+SPEC CHECKSUMS:
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  geolocator_apple: ab36aa0e8b7d7a2d7639b3b4e48308394e8cef5e
+  mdsflutter: bd3c0b3335d50947d1a192cf70f930e0fb04a766
+  Movesense: dc64047c1feb856b7f7ac6ea2c67685350d99dd5
+  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
+  SwiftProtobuf: e1b437c8e31a4c5577b643249a0bb62ed4f02153
+
+PODFILE CHECKSUM: 6eae586d9f6105359bb32c99d1c20f40098a103b
+
+COCOAPODS: 1.16.2

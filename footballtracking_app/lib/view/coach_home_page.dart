@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../viewmodel/coach_viewmodel.dart';
 import '../viewmodel/coach_player_viewmodel.dart';
 import 'coach_playerData_page.dart';

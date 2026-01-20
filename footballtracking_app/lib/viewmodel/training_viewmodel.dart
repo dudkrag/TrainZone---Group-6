@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 import '../model/app_model.dart';
+import '../model/gps_model.dart';
+import '../model/calculate_distance.dart';
 
 class TrainingViewModel extends ChangeNotifier {
   final Player player;
   final MovesenseManager movesense;
   final TrainingRepository repository;
+
+  /// =========================
+  /// GPS (stream + distance)
+  /// =========================
+  final GpsModel gps;
+  late final CalculateDistance distanceCalculator;
+
+  double get distanceMeters => distanceCalculator.state.totalDistanceMeters;
+  double get distanceKm => distanceCalculator.state.totalDistanceKm;
 
   late final TrainingLogic logic;
 
@@ -17,7 +28,7 @@ class TrainingViewModel extends ChangeNotifier {
 
   TrainingSession? lastSession;
 
-  // 🔥 zona ideal
+  // Ideal zone tracking
   Duration _totalTime = Duration.zero;
   Duration _idealZoneTime = Duration.zero;
   DateTime? _lastSampleTime;
@@ -26,8 +37,10 @@ class TrainingViewModel extends ChangeNotifier {
     required this.player,
     required this.movesense,
     required this.repository,
+    required this.gps,
   }) {
     logic = TrainingLogic(player: player);
+    distanceCalculator = CalculateDistance(gps: gps);
   }
 
   /// =========================
@@ -43,6 +56,18 @@ class TrainingViewModel extends ChangeNotifier {
     _idealZoneTime = Duration.zero;
     _lastSampleTime = null;
 
+    // Reset distance
+    distanceCalculator.reset();
+
+    // Start GPS stream (stream-only GPS model)
+    gps.start();
+
+    // Start distance calculation (listens to gps.stream)
+    distanceCalculator.start((_) {
+      notifyListeners();
+    });
+
+    // Start HR stream
     movesense.startHrStream((hr) {
       final now = DateTime.now();
 
@@ -66,12 +91,19 @@ class TrainingViewModel extends ChangeNotifier {
   }
 
   TrainingSession stopTraining() {
+    // Stop streams
     movesense.stopHrStream();
+    distanceCalculator.stop();
+    gps.stop();
+
     isTraining = false;
 
     final duration = DateTime.now().difference(_startTime!);
-    final avgHr =
-        _hrSamples.reduce((a, b) => a + b) / _hrSamples.length;
+
+    // Avoid crash if no HR samples
+    final avgHr = _hrSamples.isEmpty
+        ? 0.0
+        : _hrSamples.reduce((a, b) => a + b) / _hrSamples.length;
 
     lastSession = TrainingSession(
       playerId: player.id,
@@ -79,6 +111,7 @@ class TrainingViewModel extends ChangeNotifier {
       avgHr: avgHr,
       duration: duration,
       idealZonePercentage: idealZonePercentage,
+      distanceMeters: distanceCalculator.state.totalDistanceMeters,
     );
 
     repository.addSession(lastSession!);
@@ -96,16 +129,13 @@ class TrainingViewModel extends ChangeNotifier {
 
     final diff = DateTime.now().difference(_startTime!);
     final minutes = diff.inMinutes.toString().padLeft(2, '0');
-    final seconds =
-        (diff.inSeconds % 60).toString().padLeft(2, '0');
+    final seconds = (diff.inSeconds % 60).toString().padLeft(2, '0');
     return '$minutes:$seconds';
   }
 
   double get idealZonePercentage {
     if (_totalTime.inMilliseconds == 0) return 0;
-    return (_idealZoneTime.inMilliseconds /
-            _totalTime.inMilliseconds) *
-        100;
+    return (_idealZoneTime.inMilliseconds / _totalTime.inMilliseconds) * 100;
   }
 
   /// =========================

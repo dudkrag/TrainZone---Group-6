@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'model/app_model.dart';
+import 'model/gps_model.dart';
 
 import 'view/welcome_page.dart';
 import 'view/home_page.dart';
@@ -23,6 +24,8 @@ class MyApp extends StatelessWidget {
     /// =========================
 
     final TrainingRepository repository = TrainingRepository();
+    final MovesenseManager movesenseManager = MovesenseManager();
+    final GpsModel gpsModel = GpsModel();
 
     final Coach coach = Coach(
       id: 'coach1',
@@ -36,7 +39,8 @@ class MyApp extends StatelessWidget {
         position: 'Midfielder',
         age: 23,
         coachId: coach.id,
-        permissions: DataPermissions(), restingHr: 60,
+        permissions: DataPermissions(),
+        restingHr: 60,
       ),
       Player(
         id: 'player2',
@@ -44,23 +48,16 @@ class MyApp extends StatelessWidget {
         position: 'Defender',
         age: 30,
         coachId: coach.id,
-        permissions: DataPermissions(), restingHr: 65,
+        permissions: DataPermissions(),
+        restingHr: 65,
       ),
     ];
 
-    /// =========================
-    /// CURRENT USER (PLAYER)
-    /// =========================
-
     final Player currentPlayer = allPlayers.first;
-
-    /// =========================
-    /// VIEWMODELS
-    /// =========================
 
     final HomeViewModel homeViewModel = HomeViewModel(
       player: currentPlayer,
-      movesense: MovesenseManager(),
+      movesense: movesenseManager,
       repository: repository,
     );
 
@@ -70,10 +67,6 @@ class MyApp extends StatelessWidget {
       repository: repository,
     );
 
-    /// =========================
-    /// APP
-    /// =========================
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'TrainZone',
@@ -81,28 +74,17 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.deepPurple,
         scaffoldBackgroundColor: Colors.white,
       ),
-
       initialRoute: '/',
-
       routes: {
-        /// =====================
-        /// WELCOME / LOGIN
-        /// =====================
         '/': (context) => WelcomePage(
               homeViewModel: homeViewModel,
               coachViewModel: coachViewModel,
             ),
-
-        /// =====================
-        /// PLAYER HOME
-        /// =====================
         '/home': (context) => HomePage(
               viewModel: homeViewModel,
+              // NOTE: HomePage will create TrainingViewModel; we pass gps via constructor below
+              gpsModel: gpsModel,
             ),
-
-        /// =====================
-        /// COACH HOME
-        /// =====================
         '/coach': (context) => CoachHomePage(
               viewModel: coachViewModel,
             ),

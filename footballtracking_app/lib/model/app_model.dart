@@ -44,14 +44,12 @@ class Coach {
   });
 }
 
-
 //zoner
 enum TrainingZone {
   low,
   ideal,
   high,
 }
-
 
 class TrainingLogic {
   final Player player;
@@ -73,6 +71,13 @@ class TrainingLogic {
   }
 }
 
+/// =========================
+/// GPS
+/// =========================
+/// GPS tracking logic (stream/listener + distance calculation) lives in:
+///   lib/model/gps_model.dart
+/// The GPS result (distance) is stored per session below as [distanceMeters].
+
 // data of training
 class TrainingSession {
   final String playerId;
@@ -81,14 +86,22 @@ class TrainingSession {
   final DateTime date;
   final double idealZonePercentage;
 
+  /// GPS distance in meters (optional)
+  final double? distanceMeters;
+
   TrainingSession({
     required this.playerId,
     required this.avgHr,
     required this.duration,
-    required this.date, required this.idealZonePercentage,
+    required this.date,
+    required this.idealZonePercentage,
+    this.distanceMeters,
   });
-}
 
+  /// Convenience getter for UI
+  double? get distanceKm =>
+      distanceMeters == null ? null : distanceMeters! / 1000.0;
+}
 
 // save data training
 class TrainingRepository {
@@ -99,12 +112,9 @@ class TrainingRepository {
   }
 
   List<TrainingSession> getSessionsByPlayer(String playerId) {
-    return _sessions
-        .where((s) => s.playerId == playerId)
-        .toList();
+    return _sessions.where((s) => s.playerId == playerId).toList();
   }
 }
-
 
 class MovesenseManager {
   static const String macAddress = '0C:8C:DC:1B:23:1F';
@@ -116,7 +126,7 @@ class MovesenseManager {
 
   Future<void> connect() async {
     _device = MovesenseDevice(address: macAddress);
-     _device!.connect();
+    _device!.connect();
 
     final battery = await _device!.getBatteryStatus();
     batteryStatus = battery.name;
@@ -124,7 +134,7 @@ class MovesenseManager {
 
   Future<void> disconnect() async {
     await _hrSub?.cancel();
-     _device?.disconnect();
+    _device?.disconnect();
     batteryStatus = null;
   }
 

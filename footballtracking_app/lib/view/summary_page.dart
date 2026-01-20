@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import '../model/app_model.dart';
 
-
 class SummaryPage extends StatelessWidget {
   final TrainingSession session;
-  
+
   const SummaryPage({
     Key? key,
     required this.session,
@@ -12,6 +11,10 @@ class SummaryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final distanceText = session.distanceKm == null
+        ? '--'
+        : '${session.distanceKm!.toStringAsFixed(2)} km';
+
     return Scaffold(
       appBar: AppBar(title: const Text('Training Summary')),
       body: Padding(
@@ -23,22 +26,29 @@ class SummaryPage extends StatelessWidget {
               'Summary',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
-
             const SizedBox(height: 24),
 
-            Text(
+            const Text(
               'Avg HR:',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Text('${session.avgHr.toStringAsFixed(1)} bpm'),
 
             const SizedBox(height: 16),
 
-            Text(
+            const Text(
               'Duration:',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Text('${session.duration.inMinutes} minutes'),
+
+            const SizedBox(height: 16),
+
+            const Text(
+              'Distance:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(distanceText),
 
             const SizedBox(height: 32),
 
@@ -47,9 +57,7 @@ class SummaryPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.popUntil(
                     context,
-                    ModalRoute.withName('/home')
-                      
-                    
+                    ModalRoute.withName('/home'),
                   );
                 },
                 child: const Text('Return to Home screen'),

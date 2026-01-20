@@ -3,17 +3,19 @@ import '../viewmodel/home_viewmodel.dart';
 import '../viewmodel/history_viewmodel.dart';
 import '../viewmodel/training_viewmodel.dart';
 import '../viewmodel/settings_viewmodel.dart';
-
+import '../model/gps_model.dart';
 import 'settings_page.dart';
 import 'training_page.dart';
 import 'history_page.dart';
 
 class HomePage extends StatelessWidget {
   final HomeViewModel viewModel;
+  final GpsModel gpsModel;
 
   const HomePage({
     Key? key,
     required this.viewModel,
+    required this.gpsModel,
   }) : super(key: key);
 
   @override
@@ -31,9 +33,6 @@ class HomePage extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  /// =====================
-                  /// TOP BAR
-                  /// =====================
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -75,9 +74,6 @@ class HomePage extends StatelessWidget {
 
                   const SizedBox(height: 16),
 
-                  /// =====================
-                  /// PLAYER CARD
-                  /// =====================
                   _Card(
                     child: Row(
                       children: [
@@ -121,9 +117,6 @@ class HomePage extends StatelessWidget {
 
                   const SizedBox(height: 16),
 
-                  /// =====================
-                  /// LAST PERFORMANCE
-                  /// =====================
                   _Card(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,22 +130,26 @@ class HomePage extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             _Metric(
-                              value: last != null
-                                  ? last.avgHr.toStringAsFixed(1)
-                                  : '--',
+                              value: last != null ? last.avgHr.toStringAsFixed(1) : '--',
                               label: 'Avg HR',
                             ),
                             _Metric(
-                              value: last != null
-                                  ? '${last.idealZonePercentage.toStringAsFixed(0)}%'
-                                  : '--',
+                              value: last != null ? '${last.idealZonePercentage.toStringAsFixed(0)}%' : '--',
                               label: '% ideal zone',
                             ),
                             _Metric(
-                              value: last != null
-                                  ? last.duration.inMinutes.toString()
-                                  : '--',
+                              value: last != null ? last.duration.inMinutes.toString() : '--',
                               label: 'min',
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _Metric(
+                              value: last?.distanceKm == null ? '--' : last!.distanceKm!.toStringAsFixed(2),
+                              label: 'km',
                             ),
                           ],
                         ),
@@ -162,38 +159,22 @@ class HomePage extends StatelessWidget {
 
                   const SizedBox(height: 16),
 
-                  /// =====================
-                  /// SENSOR STATUS
-                  /// =====================
                   Card(
                     child: ListTile(
                       leading: Icon(
-                        viewModel.isConnected
-                            ? Icons.bluetooth_connected
-                            : Icons.bluetooth_disabled,
-                        color: viewModel.isConnected
-                            ? Colors.green
-                            : Colors.red,
+                        viewModel.isConnected ? Icons.bluetooth_connected : Icons.bluetooth_disabled,
+                        color: viewModel.isConnected ? Colors.green : Colors.red,
                       ),
                       title: Text(
-                        viewModel.isConnected
-                            ? 'Movesense connected'
-                            : 'Movesense disconnected',
+                        viewModel.isConnected ? 'Movesense connected' : 'Movesense disconnected',
                       ),
-                      subtitle: viewModel.isConnected &&
-                              viewModel.batteryStatus != null
+                      subtitle: viewModel.isConnected && viewModel.batteryStatus != null
                           ? (() {
-                              final isLowBattery =
-                                  viewModel.batteryStatus!
-                                          .toLowerCase() ==
-                                      'low';
-
+                              final isLowBattery = viewModel.batteryStatus!.toLowerCase() == 'low';
                               return Text(
                                 'Battery: ${isLowBattery ? "LOW" : "OK"}',
                                 style: TextStyle(
-                                  color: isLowBattery
-                                      ? Colors.red
-                                      : Colors.green,
+                                  color: isLowBattery ? Colors.red : Colors.green,
                                   fontWeight: FontWeight.bold,
                                 ),
                               );
@@ -203,28 +184,17 @@ class HomePage extends StatelessWidget {
                           ? const SizedBox(
                               width: 24,
                               height: 24,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : ElevatedButton(
-                              onPressed: viewModel.isConnected
-                                  ? viewModel.disconnect
-                                  : viewModel.connect,
-                              child: Text(
-                                viewModel.isConnected
-                                    ? 'Disconnect'
-                                    : 'Connect',
-                              ),
+                              onPressed: viewModel.isConnected ? viewModel.disconnect : viewModel.connect,
+                              child: Text(viewModel.isConnected ? 'Disconnect' : 'Connect'),
                             ),
                     ),
                   ),
 
                   const SizedBox(height: 24),
 
-                  /// =====================
-                  /// ACTION BUTTONS
-                  /// =====================
                   Row(
                     children: [
                       Expanded(
@@ -260,6 +230,7 @@ class HomePage extends StatelessWidget {
                                           player: viewModel.player,
                                           movesense: viewModel.movesense,
                                           repository: viewModel.repository,
+                                          gps: gpsModel,
                                         ),
                                       ),
                                     ),
