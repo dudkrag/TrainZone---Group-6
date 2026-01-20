@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'model/app_model.dart';
-<<<<<<< HEAD
-=======
 import 'model/gps_model.dart';
->>>>>>> calculate_speed
 import 'view/welcome_page.dart';
 import 'view/home_page.dart';
 import 'view/coach_home_page.dart';
@@ -21,14 +18,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TrainingRepository repository = TrainingRepository();
-<<<<<<< HEAD
  
     //example of user      - REMEMBER TO CHANGE HEREEEEEEE
-=======
     final MovesenseManager movesenseManager = MovesenseManager();
     final GpsModel gpsModel = GpsModel();
 
->>>>>>> calculate_speed
     final Coach coach = Coach(
       id: 'coach1',
       name: 'Coach Ana',
@@ -54,16 +48,11 @@ class MyApp extends StatelessWidget {
       ),
     ];
 
-<<<<<<< HEAD
 
     final Player currentPlayer = allPlayers.first;
 
     
          //should i move to viewmodel?
-=======
-    final Player currentPlayer = allPlayers.first;
-
->>>>>>> calculate_speed
     final HomeViewModel homeViewModel = HomeViewModel(
       player: currentPlayer,
       movesense: movesenseManager,
@@ -76,10 +65,7 @@ class MyApp extends StatelessWidget {
       repository: repository,
     );
 
-<<<<<<< HEAD
    
-=======
->>>>>>> calculate_speed
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'TrainZone',
@@ -88,32 +74,22 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.white,
       ),
       initialRoute: '/',
-<<<<<<< HEAD
 
-      routes: {  //login
        
-=======
       routes: {
->>>>>>> calculate_speed
         '/': (context) => WelcomePage(
               homeViewModel: homeViewModel,
               coachViewModel: coachViewModel,
             ),
-<<<<<<< HEAD
 
         
-=======
->>>>>>> calculate_speed
         '/home': (context) => HomePage(
               viewModel: homeViewModel,
               // NOTE: HomePage will create TrainingViewModel; we pass gps via constructor below
               gpsModel: gpsModel,
             ),
-<<<<<<< HEAD
 
         
-=======
->>>>>>> calculate_speed
         '/coach': (context) => CoachHomePage(
               viewModel: coachViewModel,
             ),

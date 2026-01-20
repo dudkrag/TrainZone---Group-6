@@ -4,7 +4,7 @@ import 'package:geolocator/geolocator.dart';
 class GpsPoint {
   final double lat;
   final double lon;
-  final double accuracy; // meters
+  final double accuracy; 
   final DateTime timestamp;
 
   /// meters/second (kan være 0 hvis ukendt)

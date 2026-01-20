@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'package:movesense_plus/movesense_plus.dart';
 
-/// =========================
-/// USERS
-/// =========================
+
 class Player {
   final String id;
   String name;
@@ -46,9 +44,7 @@ class Coach {
   });
 }
 
-/// =========================
-/// ZONES
-/// =========================
+
 enum TrainingZone {
   low,
   ideal,
@@ -75,9 +71,7 @@ class TrainingLogic {
   }
 }
 
-/// =========================
-/// TRAINING DATA
-/// =========================
+
 class TrainingSession {
   final String playerId;
   final double avgHr;
@@ -112,14 +106,8 @@ class TrainingSession {
   double? get maxSpeedKmh => maxSpeedMps == null ? null : maxSpeedMps! * 3.6;
 }
 
-<<<<<<< HEAD
 
 // "save" data training, change to DataManager when implementing database. obs: store.record(xxx.id:xx.toJson());
-=======
-/// =========================
-/// SAVE TRAINING DATA
-/// =========================
->>>>>>> calculate_speed
 class TrainingRepository {
   final List<TrainingSession> _sessions = [];
 
@@ -132,18 +120,9 @@ class TrainingRepository {
   }
 }
 
-<<<<<<< HEAD
 
 class MovesenseManager {            //Controller           - move to another file 
   static const String macAddress = '0C:8C:DC:1B:23:1F';   //change here if we use Amins Movesense
-=======
-/// =========================
-/// MOVESENSE
-/// =========================
-class MovesenseManager {
-  static const String macAddress = '0C:8C:DC:1B:23:1F';
-
->>>>>>> calculate_speed
   MovesenseDevice? _device;
   StreamSubscription<MovesenseHR>? _hrSub;
   String? batteryStatus;
@@ -158,14 +137,9 @@ class MovesenseManager {
   }
 
   Future<void> disconnect() async {
-<<<<<<< HEAD
     stopHrStream();              
     _device?.disconnect();       
     _device = null;                   
-=======
-    await _hrSub?.cancel();
-    _device?.disconnect();
->>>>>>> calculate_speed
     batteryStatus = null;
   }
 

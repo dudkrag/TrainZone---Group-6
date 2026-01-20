@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import '../model/app_model.dart';
-<<<<<<< HEAD
 import 'package:vibration/vibration.dart';
-=======
 import '../model/gps_model.dart';
 import '../model/calculate_distance.dart';
 import '../model/speed_calculator.dart';
->>>>>>> calculate_speed
 
 class TrainingViewModel extends ChangeNotifier {
   final Player player;
@@ -39,10 +36,7 @@ class TrainingViewModel extends ChangeNotifier {
 
   TrainingSession? lastSession;
 
-<<<<<<< HEAD
-=======
   // Ideal zone tracking
->>>>>>> calculate_speed
   Duration _totalTime = Duration.zero;
   //ideal duration
   Duration _idealZoneTime = Duration.zero;
@@ -59,13 +53,8 @@ class TrainingViewModel extends ChangeNotifier {
     speedCalculator = SpeedCalculator(gps: gps);
   }
 
-<<<<<<< HEAD
   
-=======
-  /// =========================
-  /// TRAINING CONTROL
-  /// =========================
->>>>>>> calculate_speed
+
   void startTraining() {
     _hrSamples.clear();
     _startTime = DateTime.now();
@@ -176,15 +165,9 @@ class TrainingViewModel extends ChangeNotifier {
     return lastSession!;
   }
 
-<<<<<<< HEAD
 
  
   //timer
-=======
-  /// =========================
-  /// TIME HELPERS
-  /// =========================
->>>>>>> calculate_speed
   String get elapsedTimeFormatted {
     if (_startTime == null) return '00:00';
 
@@ -199,14 +182,8 @@ class TrainingViewModel extends ChangeNotifier {
     return (_idealZoneTime.inMilliseconds / _totalTime.inMilliseconds) * 100;
   }
 
-<<<<<<< HEAD
   
   //ZONE visual info
-=======
-  /// =========================
-  /// UI HELPERS
-  /// =========================
->>>>>>> calculate_speed
   String get zoneLabel {
     switch (currentZone) {
       case TrainingZone.low:
