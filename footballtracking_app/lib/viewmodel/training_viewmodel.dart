@@ -25,7 +25,7 @@ class TrainingViewModel extends ChangeNotifier {
   double get distanceKm => distanceCalculator.state.totalDistanceKm;
 
   double get currentSpeedKmh => speedCalculator.state.currentKmh;
-  double get avgSpeedKmh => speedCalculator.state.avgKmh;
+  double get avgSpeedKmh => speedCalculator.state.avgKmh; // live avg (accepted segments)
   double get maxSpeedKmh => speedCalculator.state.maxKmh;
 
   late final TrainingLogic logic;
@@ -98,8 +98,6 @@ class TrainingViewModel extends ChangeNotifier {
       // Only fetch weather once
       if (_weatherRequested) return;
 
-      // Brug en mere tolerant threshold end 25m (mange telefoner ligger 30-60m i starten)
-      // Justér evt. til 60 hvis du ofte får null
       if (p.accuracy > 50) return;
 
       _weatherRequested = true;
@@ -204,6 +202,14 @@ class TrainingViewModel extends ChangeNotifier {
         ? 0.0
         : _hrSamples.reduce((a, b) => a + b) / _hrSamples.length;
 
+    // ✅ Avg speed based on MOVING TIME (Strava/Whoop style)
+    final movingSeconds =
+        speedCalculator.movingTime.inMilliseconds / 1000.0;
+
+    final avgSpeedMpsMoving = movingSeconds <= 0
+        ? 0.0
+        : distanceCalculator.state.totalDistanceMeters / movingSeconds;
+
     lastSession = TrainingSession(
       playerId: player.id,
       date: DateTime.now(),
@@ -211,9 +217,9 @@ class TrainingViewModel extends ChangeNotifier {
       duration: duration,
       idealZonePercentage: idealZonePercentage,
       distanceMeters: distanceCalculator.state.totalDistanceMeters,
-      avgSpeedMps: speedCalculator.state.avgSpeedMps,
+      avgSpeedMps: avgSpeedMpsMoving,          // ✅ moving avg speed
       maxSpeedMps: speedCalculator.state.maxSpeedMps,
-      weather: weather, // should now be set more reliably
+      weather: weather,
     );
 
     await repository.addSession(lastSession!);

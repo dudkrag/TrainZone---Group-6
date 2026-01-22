@@ -4,7 +4,7 @@ import 'gps_model.dart';
 
 class SpeedState {
   final double currentSpeedMps; // display speed (stabil, live)
-  final double avgSpeedMps;     // distance / time
+  final double avgSpeedMps;     // distance / time (for accepted segments)
   final double maxSpeedMps;
 
   const SpeedState({
@@ -17,7 +17,11 @@ class SpeedState {
   double get avgKmh => avgSpeedMps * 3.6;
   double get maxKmh => maxSpeedMps * 3.6;
 
-  static const zero = SpeedState(currentSpeedMps: 0, avgSpeedMps: 0, maxSpeedMps: 0);
+  static const zero = SpeedState(
+    currentSpeedMps: 0,
+    avgSpeedMps: 0,
+    maxSpeedMps: 0,
+  );
 }
 
 class SpeedCalculator {
@@ -28,9 +32,12 @@ class SpeedCalculator {
 
   GpsPoint? _last;
 
-  // Distance/time for avg
+  // Distance/time for avg (accepted segments only)
   double _distForAvg = 0.0;
   Duration _timeForAvg = Duration.zero;
+
+  // Moving time (Whoop/Strava style)
+  Duration _movingTime = Duration.zero;
 
   // Display smoothing
   double _displayEmaMps = 0.0;
@@ -40,28 +47,36 @@ class SpeedCalculator {
   Duration _belowThresholdTime = Duration.zero;
 
   // Tuning knobs (defaults tuned for running + walking outdoors)
-  final double maxAccuracyMeters;          // ignore worse points
-  final Duration minDeltaTime;             // avoid micro dt
-  final double maxReasonableSpeedMps;      // reject jumps
-  final double minMoveMetersGood;          // movement threshold when accuracy is good
-  final double minMoveMetersNoisy;         // movement threshold when accuracy is noisy
-  final double emaAlpha;                   // responsiveness
-  final double zeroLockKmh;                // below this, tend to lock to 0
-  final double unlockKmh;                  // must exceed this to unlock from 0
-  final Duration zeroLockDelay;            // how long below threshold before locking
+  final double maxAccuracyMeters;     // ignore worse points
+  final Duration minDeltaTime;        // avoid micro dt
+  final double maxReasonableSpeedMps; // reject jumps
+  final double minMoveMetersGood;     // movement threshold when accuracy is good
+  final double minMoveMetersNoisy;    // movement threshold when accuracy is noisy
+  final double emaAlpha;              // responsiveness
+
+  // Display lock thresholds
+  final double zeroLockKmh;
+  final double unlockKmh;
+  final Duration zeroLockDelay;
+
+  // Moving-time threshold (only count as moving above this)
+  final double movingThresholdKmh;
 
   SpeedCalculator({
     required this.gps,
     this.maxAccuracyMeters = 25.0,
     this.minDeltaTime = const Duration(milliseconds: 900),
-    this.maxReasonableSpeedMps = 12.0,     // ~43 km/h
+    this.maxReasonableSpeedMps = 12.0, // ~43 km/h
     this.minMoveMetersGood = 1.2,
     this.minMoveMetersNoisy = 2.8,
-    this.emaAlpha = 0.22,                  // feels “real-time” but stable
-    this.zeroLockKmh = 1.2,                // below 1.2 km/h => push toward zero
-    this.unlockKmh = 2.2,                  // must exceed 2.2 km/h to show moving
+    this.emaAlpha = 0.22,
+    this.zeroLockKmh = 1.2,
+    this.unlockKmh = 2.2,
     this.zeroLockDelay = const Duration(seconds: 2),
+    this.movingThresholdKmh = 2.0, // count moving time only if >= 2.0 km/h
   });
+
+  Duration get movingTime => _movingTime;
 
   void reset() {
     stop();
@@ -69,6 +84,7 @@ class SpeedCalculator {
     _last = null;
     _distForAvg = 0.0;
     _timeForAvg = Duration.zero;
+    _movingTime = Duration.zero;
     _displayEmaMps = 0.0;
     _lockedZero = true;
     _belowThresholdTime = Duration.zero;
@@ -115,20 +131,19 @@ class SpeedCalculator {
         return;
       }
 
-      // Update avg only when we accept a plausible segment
+      // Update avg ONLY when we accept a plausible segment (rawMps > 0)
       if (rawMps > 0) {
         _distForAvg += d;
         _timeForAvg += dt;
       }
 
-      // Two-step: smooth raw into display speed
+      // Smooth raw into display speed
       _displayEmaMps = _ema(rawMps, _displayEmaMps);
 
-      // Apply zero-lock hysteresis to eliminate “walking in house shows 7 km/h”
+      // Apply zero-lock hysteresis
       final displayKmh = _displayEmaMps * 3.6;
 
       if (_lockedZero) {
-        // Only unlock if we clearly exceed unlock threshold
         if (displayKmh >= unlockKmh) {
           _lockedZero = false;
           _belowThresholdTime = Duration.zero;
@@ -136,7 +151,6 @@ class SpeedCalculator {
           _displayEmaMps = 0.0;
         }
       } else {
-        // If we fall below zeroLockKmh for long enough, lock to zero
         if (displayKmh < zeroLockKmh) {
           _belowThresholdTime += dt;
           if (_belowThresholdTime >= zeroLockDelay) {
@@ -147,6 +161,11 @@ class SpeedCalculator {
         } else {
           _belowThresholdTime = Duration.zero;
         }
+      }
+
+      // Moving time (Strava/Whoop style): count dt only when display speed is above threshold
+      if ((_displayEmaMps * 3.6) >= movingThresholdKmh) {
+        _movingTime += dt;
       }
 
       final avgMps = (_timeForAvg.inMilliseconds == 0)
