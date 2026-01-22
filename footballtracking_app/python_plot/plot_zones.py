@@ -4,11 +4,9 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-# 📂 Path to data folder (relative to this script)
+#path data
 BASE_DIR = os.path.dirname(__file__)
 DATA_DIR = os.path.join(BASE_DIR, "data")
-
-# 🔍 Find all player session files
 files = glob.glob(os.path.join(DATA_DIR, "player_*_sessions.json"))
 
 if not files:
