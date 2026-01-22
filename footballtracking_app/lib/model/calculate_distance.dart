@@ -20,9 +20,8 @@ class CalculateDistance {
 
   GpsPoint? _last;
 
-  // Filtre (justér gerne)
-  final double maxAccuracyMeters; // discard hvis dårlig GPS
-  final double minStepMeters;     // discard små jitter-hop
+  final double maxAccuracyMeters; 
+  final double minStepMeters;     
 
   CalculateDistance({
     required this.gps,

@@ -1,34 +1,42 @@
-import '../model/app_model.dart';
+import 'package:flutter/material.dart';
+import '../model/users.dart';
+import '../model/storage.dart';
+import '../model/training.dart';
 
-class CoachViewModel {
+class CoachViewModel extends ChangeNotifier {
   final Coach coach;
-  final List<Player> allPlayers;
-  final TrainingRepository repository; // 🔥 FALTAVA ISSO
+  final PlayerRepository playerRepository;
+  final TrainingRepository trainingRepository;
+
+  bool isLoading = true;
+  List<Player> _players = [];
 
   CoachViewModel({
     required this.coach,
-    required this.allPlayers,
-    required this.repository,
+    required this.playerRepository,
+    required this.trainingRepository,
   });
 
-  List<TrainingSession> getAuthorizedSessions(Player player) {
-  if (!player.permissions.trainingHistory) {
-    return [];
-  }
+  List<Player> get playersOfCoach => _players;
 
-  return repository.getSessionsByPlayer(player.id);
+  /// 🔥 CARREGA PLAYERS ASSOCIADOS AO COACH
+  Future<void> loadPlayers() async {
+    isLoading = true;
+    notifyListeners();
 
-  
-}
+    final allPlayers = await playerRepository.getAll();
 
-
-
-
-
-  /// Jogadores associados ao coach
-  List<Player> get playersOfCoach {
-    return allPlayers
+    _players = allPlayers
         .where((p) => p.coachId == coach.id)
         .toList();
+
+    isLoading = false;
+    notifyListeners();
+  }
+
+  /// 🔒 RESPEITA PERMISSÕES
+  Future<List<TrainingSession>> getAuthorizedSessions(Player player) async {
+    if (!player.permissions.trainingHistory) return [];
+    return await trainingRepository.getSessionsByPlayer(player.id);
   }
 }

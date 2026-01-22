@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import '../model/app_model.dart';
+import '../model/users.dart';
+import '../model/storage.dart';
 
 class SettingsViewModel extends ChangeNotifier {
   final Player player;
+  final PlayerRepository repository;
 
-  SettingsViewModel({required this.player});
-
-  /// =====================
-  /// PLAYER INFO
-  /// =====================
+  SettingsViewModel({
+    required this.player,
+    required this.repository,
+  });
 
   void updateName(String value) {
     player.name = value;
@@ -33,10 +34,6 @@ class SettingsViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// =====================
-  /// PRIVACY PERMISSIONS
-  /// =====================
-
   void toggleHeartRate(bool value) {
     player.permissions.heartRate = value;
     notifyListeners();
@@ -50,5 +47,10 @@ class SettingsViewModel extends ChangeNotifier {
   void toggleTrainingHistory(bool value) {
     player.permissions.trainingHistory = value;
     notifyListeners();
+  }
+
+  /// 🔥 ISSO ESTAVA FALTANDO
+  Future<void> save() async {
+    await repository.update(player);
   }
 }

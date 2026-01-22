@@ -1,0 +1,19 @@
+{
+  "playerId": "1769096870315",
+  "playerName": "Amin",
+  "exportedAt": "2026-01-22T16:50:56.127783",
+  "sessions": [
+    {
+      "playerId": "1769096870315",
+      "avgHr": 101.51428571428572,
+      "duration": 95,
+      "date": "2026-01-22T16:50:47.200734",
+      "lowZonePercentage": 88.53615520282186,
+      "idealZonePercentage": 11.46384479717813,
+      "highZonePercentage": 0.0,
+      "distanceMeters": 42.462979430743786,
+      "avgSpeedMps": 0.705681608541103,
+      "maxSpeedMps": 3.9727096557617188
+    }
+  ]
+}

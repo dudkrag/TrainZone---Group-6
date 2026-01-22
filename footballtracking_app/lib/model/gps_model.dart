@@ -7,7 +7,6 @@ class GpsPoint {
   final double accuracy; 
   final DateTime timestamp;
 
-  /// meters/second (kan være 0 hvis ukendt)
   final double speedMps;
 
   GpsPoint({
@@ -19,7 +18,6 @@ class GpsPoint {
   });
 
   factory GpsPoint.fromPosition(Position p) {
-    // timestamp kan i nogle tilfælde være null afhængigt af platform/config
     final ts = p.timestamp ?? DateTime.now();
 
     final spd = (p.speed.isNaN || p.speed < 0) ? 0.0 : p.speed;
@@ -42,7 +40,7 @@ class GpsModel {
   bool get isTracking => _sub != null;
   Stream<GpsPoint> get stream => _controller.stream;
 
-  String? lastError;
+  String? lastError;  //handle error with msg
 
   LocationSettings locationSettings = const LocationSettings(
     accuracy: LocationAccuracy.bestForNavigation,
@@ -64,13 +62,9 @@ class GpsModel {
 
       if (perm == LocationPermission.denied) {
         lastError = 'Location permission denied.';
-        return false;
+        return false;  
       }
 
-      if (perm == LocationPermission.deniedForever) {
-        lastError = 'Location permission denied forever.';
-        return false;
-      }
 
       lastError = null;
       return true;

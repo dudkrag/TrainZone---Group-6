@@ -53,15 +53,10 @@ class _SettingsPageState extends State<SettingsPage> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              /// =====================
-              /// PLAYER INFO
-              /// =====================
               const Text(
                 'Personal Information',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style:
+                    TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
 
               const SizedBox(height: 12),
@@ -97,42 +92,29 @@ class _SettingsPageState extends State<SettingsPage> {
 
               const SizedBox(height: 24),
 
-              /// =====================
-              /// PRIVACY
-              /// =====================
               const Text(
                 'Data Sharing Preferences',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style:
+                    TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-
-              const SizedBox(height: 8),
 
               SwitchListTile(
                 title: const Text('Share heart rate data'),
-                subtitle: const Text(
-                    'Allows the coach to view your heart rate'),
-                value:
-                    widget.viewModel.player.permissions.heartRate,
+                value: widget
+                    .viewModel.player.permissions.heartRate,
                 onChanged: widget.viewModel.toggleHeartRate,
               ),
 
               SwitchListTile(
                 title: const Text('Share training zones'),
-                subtitle: const Text(
-                    'Allows the coach to view intensity zones'),
-                value: widget
-                    .viewModel.player.permissions.trainingZones,
+                value: widget.viewModel.player.permissions
+                    .trainingZones,
                 onChanged:
                     widget.viewModel.toggleTrainingZones,
               ),
 
               SwitchListTile(
                 title: const Text('Share training history'),
-                subtitle: const Text(
-                    'Allows the coach to view past sessions'),
                 value: widget.viewModel.player.permissions
                     .trainingHistory,
                 onChanged:
@@ -142,7 +124,8 @@ class _SettingsPageState extends State<SettingsPage> {
               const SizedBox(height: 32),
 
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  await widget.viewModel.save(); // 🔥 AGORA SALVA
                   Navigator.pop(context);
                 },
                 child: const Text('Save & Back'),

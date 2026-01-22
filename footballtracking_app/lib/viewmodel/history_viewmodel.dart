@@ -1,19 +1,44 @@
 import 'package:flutter/material.dart';
-import '../model/app_model.dart';
+import '../model/users.dart';
+import '../model/training.dart';
+import '../model/storage.dart';
+import 'dart:io';
+
 
 class HistoryViewModel extends ChangeNotifier {
   final TrainingRepository repository;
   final Player player;
+
+  List<TrainingSession> sessions = [];
+  bool isLoading = true;
 
   HistoryViewModel({
     required this.repository,
     required this.player,
   });
 
-  /// Lista de treinos do jogador
-  List<TrainingSession> get history {
-    return repository.getSessionsByPlayer(player.id);
+  Future<void> loadHistory() async {
+    isLoading = true;
+    notifyListeners();
+
+    sessions = await repository.getSessionsByPlayer(player.id);
+
+    isLoading = false;
+    notifyListeners();
   }
 
-  bool get isEmpty => history.isEmpty;
+  bool get isEmpty => sessions.isEmpty;
+
+  ///PYTHON
+  Future<File> exportHistory() async {
+
+    if (sessions.isEmpty) {
+      sessions = await repository.getSessionsByPlayer(player.id);
+    }
+
+    return ExportService.exportPlayerSessions(
+      player: player,
+      sessions: sessions,
+    );
+  }
 }

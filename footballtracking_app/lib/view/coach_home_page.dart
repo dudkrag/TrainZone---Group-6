@@ -3,7 +3,7 @@ import '../viewmodel/coach_viewmodel.dart';
 import '../viewmodel/coach_player_viewmodel.dart';
 import 'coach_playerData_page.dart';
 
-class CoachHomePage extends StatelessWidget {
+class CoachHomePage extends StatefulWidget {
   final CoachViewModel viewModel;
 
   const CoachHomePage({
@@ -12,46 +12,65 @@ class CoachHomePage extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final players = viewModel.playersOfCoach;
+  State<CoachHomePage> createState() => _CoachHomePageState();
+}
 
+class _CoachHomePageState extends State<CoachHomePage> {
+  @override
+  void initState() {
+    super.initState();
+    widget.viewModel.loadPlayers(); // 🔥 AQUI
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Coach Dashboard'),
       ),
-      body: players.isEmpty
-          ? const Center(
-              child: Text('No associated player'),
-            )
-          : ListView.builder(
-              itemCount: players.length,
-              itemBuilder: (context, index) {
-                final player = players[index];
+      body: ListenableBuilder(
+        listenable: widget.viewModel,
+        builder: (context, _) {
+          if (widget.viewModel.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-                return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  child: ListTile(
-                    leading: const Icon(Icons.person),
-                    title: Text(player.name),
-                    subtitle: Text(player.position),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => CoachPlayerDetailPage(
-                            viewModel: CoachPlayerViewModel(
-                              player: player,
-                              repository: viewModel.repository,
-                            ),
+          if (widget.viewModel.playersOfCoach.isEmpty) {
+            return const Center(
+              child: Text('No players assigned to this coach'),
+            );
+          }
+
+          return ListView.builder(
+            itemCount: widget.viewModel.playersOfCoach.length,
+            itemBuilder: (context, index) {
+              final player = widget.viewModel.playersOfCoach[index];
+
+              return Card(
+                child: ListTile(
+                  leading: const Icon(Icons.person),
+                  title: Text(player.name),
+                  subtitle: Text('ID: ${player.id}'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CoachPlayerPage(
+                          viewModel: CoachPlayerViewModel(
+                            player: player,
+                            repository:
+                                widget.viewModel.trainingRepository,
                           ),
                         ),
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

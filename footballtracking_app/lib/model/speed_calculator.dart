@@ -3,8 +3,8 @@ import 'dart:math';
 import 'gps_model.dart';
 
 class SpeedState {
-  final double currentSpeedMps; // øjeblikkelig (glattet)
-  final double avgSpeedMps; // tid-vægtet
+  final double currentSpeedMps; 
+  final double avgSpeedMps; 
   final double maxSpeedMps;
 
   const SpeedState({

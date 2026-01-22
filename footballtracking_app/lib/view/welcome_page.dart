@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
-
-import '../viewmodel/home_viewmodel.dart';
-import '../viewmodel/coach_viewmodel.dart';
+import '../model/storage.dart';
+import '../viewmodel/login_viewmodel.dart';
+import '../viewmodel/coach_login_viewmodel.dart';
+import '../view/player_login_page.dart';
+import '../view/coach_login_page.dart';
 
 class WelcomePage extends StatelessWidget {
-  final HomeViewModel homeViewModel;
-  final CoachViewModel coachViewModel;
+  final PlayerRepository playerRepository;
+  final TrainingRepository trainingRepository;
+  final CoachRepository coachRepository;
 
   const WelcomePage({
     Key? key,
-    required this.homeViewModel,
-    required this.coachViewModel,
+    required this.playerRepository,
+    required this.trainingRepository,
+    required this.coachRepository,
   }) : super(key: key);
 
   @override
@@ -21,40 +25,50 @@ class WelcomePage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              'Welcome to TrainZone',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
+              'TrainZone',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
-
             const SizedBox(height: 40),
 
-            /// =======================
-            /// PLAYER
-            /// =======================
+            /// PLAYER LOGIN
             SizedBox(
-              width: 220,
+              width: 200,
               child: OutlinedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/home');
-                },
                 child: const Text('Player'),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PlayerLoginPage(
+                        viewModel: LoginViewModel(playerRepository),
+                        repository: trainingRepository,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
 
             const SizedBox(height: 16),
 
-            /// =======================
-            /// COACH
-            /// =======================
+            /// COACH LOGIN
             SizedBox(
-              width: 220,
+              width: 200,
               child: OutlinedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/coach');
-                },
                 child: const Text('Coach'),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CoachLoginPage(
+                        viewModel:
+                            CoachLoginViewModel(coachRepository),
+                        trainingRepository: trainingRepository,
+                        playerRepository: playerRepository,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],

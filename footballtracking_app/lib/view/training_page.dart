@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:TrainZone/viewmodel/home_viewmodel.dart';
 import '../viewmodel/training_viewmodel.dart';
 import 'summary_page.dart';
 
 class TrainingPage extends StatefulWidget {
   final TrainingViewModel viewModel;
+  final HomeViewModel homeViewModel;
 
   const TrainingPage({
     Key? key,
-    required this.viewModel,
+    required this.viewModel, required this.homeViewModel,
   }) : super(key: key);
 
   @override
@@ -23,8 +25,7 @@ class _TrainingPageState extends State<TrainingPage> {
 
   @override
   void dispose() {
-    // If user navigates back without pressing End training,
-    // we stop streams to avoid leaks.
+    // If user navigates back without pressing End training, we stop streams to avoid "leaks"
     if (widget.viewModel.isTraining) {
       widget.viewModel.stopTraining();
     }
@@ -150,12 +151,12 @@ class _TrainingPageState extends State<TrainingPage> {
                           foregroundColor: Colors.black,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        onPressed: () {
-                          final session = widget.viewModel.stopTraining();
+                        onPressed: () async {
+                          final session = await widget.viewModel.stopTraining();
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => SummaryPage(session: session),
+                              builder: (_) => SummaryPage(session: session, homeViewModel: widget.homeViewModel,),
                             ),
                           );
                         },
