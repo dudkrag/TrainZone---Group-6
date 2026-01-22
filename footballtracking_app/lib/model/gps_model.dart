@@ -4,7 +4,7 @@ import 'package:geolocator/geolocator.dart';
 class GpsPoint {
   final double lat;
   final double lon;
-  final double accuracy; 
+  final double accuracy;
   final DateTime timestamp;
 
   /// meters/second (kan være 0 hvis ukendt)
@@ -19,9 +19,7 @@ class GpsPoint {
   });
 
   factory GpsPoint.fromPosition(Position p) {
-    // timestamp kan i nogle tilfælde være null afhængigt af platform/config
     final ts = p.timestamp ?? DateTime.now();
-
     final spd = (p.speed.isNaN || p.speed < 0) ? 0.0 : p.speed;
 
     return GpsPoint(
@@ -44,9 +42,10 @@ class GpsModel {
 
   String? lastError;
 
+  // Sport-friendly defaults
   LocationSettings locationSettings = const LocationSettings(
     accuracy: LocationAccuracy.bestForNavigation,
-    distanceFilter: 5,
+    distanceFilter: 2, // lavere end 5 for mere konsistente samples
   );
 
   Future<bool> ensurePermissions() async {

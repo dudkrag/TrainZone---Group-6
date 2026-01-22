@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:vibration/vibration.dart';
 import '../model/app_model.dart';
@@ -6,6 +7,7 @@ import '../model/calculate_distance.dart';
 import '../model/speed_calculator.dart';
 import '../model/training_repository.dart';
 import '../model/weather_model.dart';
+import '../model/weather_service.dart';
 
 class TrainingViewModel extends ChangeNotifier {
   final Player player;
@@ -46,12 +48,12 @@ class TrainingViewModel extends ChangeNotifier {
   /// =========================
   /// WEATHER
   /// =========================
-  WeatherData? weather;
+  final WeatherService _weatherService = WeatherService();
+  StreamSubscription<GpsPoint>? _gpsTapSub; // tap GPS for last point + weather fetch
+  bool _weatherRequested = false;
+  GpsPoint? _lastGpsPoint;
 
-  void setWeather({required double tempC, required double windMps}) {
-    weather = WeatherData(temperatureC: tempC, windSpeedMps: windMps);
-    notifyListeners();
-  }
+  WeatherData? weather;
 
   TrainingViewModel({
     required this.player,
@@ -78,8 +80,40 @@ class TrainingViewModel extends ChangeNotifier {
     distanceCalculator.reset();
     speedCalculator.reset();
 
+    // Reset weather
+    weather = null;
+    _weatherRequested = false;
+    _lastGpsPoint = null;
+
+    _gpsTapSub?.cancel();
+    _gpsTapSub = null;
+
     // Start GPS stream
     gps.start();
+
+    // Tap GPS points so we always keep last point and can fetch weather once
+    _gpsTapSub = gps.stream.listen((p) async {
+      _lastGpsPoint = p;
+
+      // Only fetch weather once
+      if (_weatherRequested) return;
+
+      // Brug en mere tolerant threshold end 25m (mange telefoner ligger 30-60m i starten)
+      // Justér evt. til 60 hvis du ofte får null
+      if (p.accuracy > 50) return;
+
+      _weatherRequested = true;
+
+      try {
+        final w = await _weatherService
+            .fetchCurrentWeather(lat: p.lat, lon: p.lon)
+            .timeout(const Duration(seconds: 4));
+        weather = w;
+        notifyListeners();
+      } catch (_) {
+        // keep null
+      }
+    });
 
     // Start distance calculation
     distanceCalculator.start((_) {
@@ -138,11 +172,29 @@ class TrainingViewModel extends ChangeNotifier {
   }
 
   Future<TrainingSession> stopTraining() async {
-    // Stop streams
+    // Stop HR stream first (GPS can keep running a moment if we need weather)
     movesense.stopHrStream();
+
+    // If we still have no weather, try once using the last GPS point we saw
+    if (weather == null && _lastGpsPoint != null) {
+      try {
+        final p = _lastGpsPoint!;
+        final w = await _weatherService
+            .fetchCurrentWeather(lat: p.lat, lon: p.lon)
+            .timeout(const Duration(seconds: 4));
+        weather = w;
+      } catch (_) {
+        // keep null
+      }
+    }
+
+    // Stop streams
     distanceCalculator.stop();
     speedCalculator.stop();
-    gps.stop();
+    await gps.stop();
+
+    _gpsTapSub?.cancel();
+    _gpsTapSub = null;
 
     isTraining = false;
 
@@ -161,7 +213,7 @@ class TrainingViewModel extends ChangeNotifier {
       distanceMeters: distanceCalculator.state.totalDistanceMeters,
       avgSpeedMps: speedCalculator.state.avgSpeedMps,
       maxSpeedMps: speedCalculator.state.maxSpeedMps,
-      weather: weather, // ✅ gemmer både temp + wind
+      weather: weather, // should now be set more reliably
     );
 
     await repository.addSession(lastSession!);

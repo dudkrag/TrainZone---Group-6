@@ -4,7 +4,7 @@ import 'gps_model.dart';
 
 class SpeedState {
   final double currentSpeedMps; // øjeblikkelig (glattet)
-  final double avgSpeedMps; // tid-vægtet
+  final double avgSpeedMps;     // tid-vægtet
   final double maxSpeedMps;
 
   const SpeedState({
@@ -44,13 +44,17 @@ class SpeedCalculator {
 
   // Filtre
   final double maxReasonableSpeedMps; // fx 12 m/s ~ 43 km/t
-  final double maxAccuracyMeters; // discard hvis dårlig GPS
+  final double maxAccuracyMeters;     // discard hvis dårlig GPS
+  final Duration minDeltaTime;        // undgå micro-dt
+  final double minDistanceForAvgMeters;
 
   SpeedCalculator({
     required this.gps,
     this.smoothingAlpha = 0.25,
     this.maxReasonableSpeedMps = 12.0,
-    this.maxAccuracyMeters = 30.0,
+    this.maxAccuracyMeters = 20.0,
+    this.minDeltaTime = const Duration(milliseconds: 700),
+    this.minDistanceForAvgMeters = 2.0,
   });
 
   void reset() {
@@ -86,13 +90,20 @@ class SpeedCalculator {
       // Update avg (tid-vægtet) baseret på distance mellem punkter
       if (_last != null) {
         final dt = p.timestamp.difference(_last!.timestamp);
-        if (dt.inMilliseconds > 0) {
+        if (dt >= minDeltaTime) {
           final d = _haversineMeters(_last!.lat, _last!.lon, p.lat, p.lon);
 
-          // små jitter-hop ignoreres
-          if (d > 0.5) {
-            _distanceMetersForAvg += d;
-            _timeForAvg += dt;
+          if (d >= minDistanceForAvgMeters) {
+            final seconds = dt.inMilliseconds / 1000.0;
+            if (seconds > 0) {
+              final implied = d / seconds;
+
+              // samme jump-filter som distance
+              if (implied <= maxReasonableSpeedMps) {
+                _distanceMetersForAvg += d;
+                _timeForAvg += dt;
+              }
+            }
           }
         }
       }
@@ -139,8 +150,10 @@ class SpeedCalculator {
     final dLon = _deg2rad(lon2 - lon1);
 
     final a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_deg2rad(lat1)) * cos(_deg2rad(lat2)) *
-            sin(dLon / 2) * sin(dLon / 2);
+        cos(_deg2rad(lat1)) *
+            cos(_deg2rad(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
 
     final c = 2 * atan2(sqrt(a), sqrt(1 - a));
     return r * c;

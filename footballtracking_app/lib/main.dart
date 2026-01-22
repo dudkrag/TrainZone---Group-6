@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // example of user - REMEMBER TO CHANGE HEREEEEEEE
     final MovesenseManager movesenseManager = MovesenseManager();
     final GpsModel gpsModel = GpsModel();
 

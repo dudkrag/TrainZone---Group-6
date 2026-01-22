@@ -20,14 +20,18 @@ class CalculateDistance {
 
   GpsPoint? _last;
 
-  // Filtre (justér gerne)
-  final double maxAccuracyMeters; // discard hvis dårlig GPS
-  final double minStepMeters;     // discard små jitter-hop
+  /// Filters
+  final double maxAccuracyMeters;      // discard hvis dårlig GPS
+  final double minStepMeters;          // discard små jitter-hop
+  final double maxReasonableSpeedMps;  // discard "jumps" der giver urealistisk speed
+  final Duration minDeltaTime;         // undgå for tætte samples (micro-dt)
 
   CalculateDistance({
     required this.gps,
-    this.maxAccuracyMeters = 30.0,
-    this.minStepMeters = 0.5,
+    this.maxAccuracyMeters = 20.0,                // strammere for sport
+    this.minStepMeters = 2.0,                     // 0.5m var for følsomt
+    this.maxReasonableSpeedMps = 12.0,            // ~43 km/h
+    this.minDeltaTime = const Duration(milliseconds: 700),
   });
 
   void reset() {
@@ -43,14 +47,36 @@ class CalculateDistance {
       if (p.accuracy > maxAccuracyMeters) return;
 
       if (_last != null) {
-        final d = _haversineMeters(_last!.lat, _last!.lon, p.lat, p.lon);
-
-        if (d >= minStepMeters) {
-          state = DistanceState(
-            totalDistanceMeters: state.totalDistanceMeters + d,
-          );
-          onUpdate(state);
+        final dt = p.timestamp.difference(_last!.timestamp);
+        if (dt < minDeltaTime) {
+          _last = p;
+          return;
         }
+
+        final d = _haversineMeters(_last!.lat, _last!.lon, p.lat, p.lon);
+        if (d < minStepMeters) {
+          _last = p;
+          return;
+        }
+
+        final seconds = dt.inMilliseconds / 1000.0;
+        if (seconds <= 0) {
+          _last = p;
+          return;
+        }
+
+        final impliedSpeed = d / seconds;
+
+        // Reject GPS jumps
+        if (impliedSpeed > maxReasonableSpeedMps) {
+          _last = p;
+          return;
+        }
+
+        state = DistanceState(
+          totalDistanceMeters: state.totalDistanceMeters + d,
+        );
+        onUpdate(state);
       }
 
       _last = p;
@@ -68,8 +94,10 @@ class CalculateDistance {
     final dLon = _deg2rad(lon2 - lon1);
 
     final a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_deg2rad(lat1)) * cos(_deg2rad(lat2)) *
-            sin(dLon / 2) * sin(dLon / 2);
+        cos(_deg2rad(lat1)) *
+            cos(_deg2rad(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
 
     final c = 2 * atan2(sqrt(a), sqrt(1 - a));
     return r * c;

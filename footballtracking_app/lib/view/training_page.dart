@@ -119,22 +119,23 @@ class _TrainingPageState extends State<TrainingPage> {
                         ),
                         const SizedBox(height: 10),
 
-                        // Distance + speed as simple readable lines
                         _SmallStatRow(
                           label: 'Distance',
-                          value: '${widget.viewModel.distanceKm.toStringAsFixed(2)} km',
+                          value:
+                              '${widget.viewModel.distanceKm.toStringAsFixed(2)} km',
                           icon: Icons.route,
                         ),
                         const SizedBox(height: 8),
                         _SmallStatRow(
                           label: 'Speed',
-                          value: '${widget.viewModel.currentSpeedKmh.toStringAsFixed(1)} km/h',
+                          value:
+                              '${widget.viewModel.currentSpeedKmh.toStringAsFixed(1)} km/h',
                           icon: Icons.speed,
                         ),
 
                         const SizedBox(height: 14),
 
-                        // WEATHER PILL (nice)
+                        // WEATHER PILL (overflow-safe)
                         _WeatherPill(
                           tempC: w?.temperatureC,
                           windMps: w?.windSpeedMps,
@@ -167,16 +168,15 @@ class _TrainingPageState extends State<TrainingPage> {
                           ),
                         ),
                         onPressed: () async {
-                           final session = await widget.viewModel.stopTraining();
+                          final session = await widget.viewModel.stopTraining();
 
-                           Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                           builder: (_) => SummaryPage(session: session),
-                          ),
-                        );
-                      },
-
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => SummaryPage(session: session),
+                            ),
+                          );
+                        },
                         child: const Text('End training'),
                       ),
                     ),
@@ -252,40 +252,55 @@ class _WeatherPill extends StatelessWidget {
         border: Border.all(color: Colors.black12),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Icon(Icons.cloud_outlined, size: 18, color: Colors.black87),
           const SizedBox(width: 10),
-          const Text(
-            'Weather',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const Spacer(),
-          if (!hasData)
-            const Text(
-              '--',
+
+          // Title
+          const Padding(
+            padding: EdgeInsets.only(top: 1),
+            child: Text(
+              'Weather',
               style: TextStyle(
                 fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: Colors.black54,
+                fontWeight: FontWeight.w800,
               ),
-            )
-          else
-            Row(
-              children: [
-                _WeatherChip(
-                  icon: Icons.thermostat,
-                  text: '${tempC!.toStringAsFixed(1)}°C',
-                ),
-                const SizedBox(width: 8),
-                _WeatherChip(
-                  icon: Icons.air,
-                  text: '${windMps!.toStringAsFixed(1)} m/s',
-                ),
-              ],
             ),
+          ),
+
+          const SizedBox(width: 10),
+
+          // Trailing area that can wrap (prevents overflow)
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: !hasData
+                  ? const Text(
+                      '--',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black54,
+                      ),
+                    )
+                  : Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      alignment: WrapAlignment.end,
+                      children: [
+                        _WeatherChip(
+                          icon: Icons.thermostat,
+                          text: '${tempC!.toStringAsFixed(1)}°C',
+                        ),
+                        _WeatherChip(
+                          icon: Icons.air,
+                          text: '${windMps!.toStringAsFixed(1)} m/s',
+                        ),
+                      ],
+                    ),
+            ),
+          ),
         ],
       ),
     );
@@ -311,6 +326,7 @@ class _WeatherChip extends StatelessWidget {
         border: Border.all(color: Colors.black12),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 16, color: Colors.black87),
           const SizedBox(width: 6),
