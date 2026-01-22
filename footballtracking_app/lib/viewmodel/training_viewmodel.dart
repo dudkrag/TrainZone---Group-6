@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import '../model/app_model.dart';
 import 'package:vibration/vibration.dart';
+import '../model/app_model.dart';
 import '../model/gps_model.dart';
 import '../model/calculate_distance.dart';
 import '../model/speed_calculator.dart';
+import '../model/training_repository.dart';
+import '../model/weather_model.dart';
 
 class TrainingViewModel extends ChangeNotifier {
   final Player player;
@@ -38,9 +40,18 @@ class TrainingViewModel extends ChangeNotifier {
 
   // Ideal zone tracking
   Duration _totalTime = Duration.zero;
-  //ideal duration
   Duration _idealZoneTime = Duration.zero;
   DateTime? _lastSampleTime;
+
+  /// =========================
+  /// WEATHER
+  /// =========================
+  WeatherData? weather;
+
+  void setWeather({required double tempC, required double windMps}) {
+    weather = WeatherData(temperatureC: tempC, windSpeedMps: windMps);
+    notifyListeners();
+  }
 
   TrainingViewModel({
     required this.player,
@@ -53,18 +64,15 @@ class TrainingViewModel extends ChangeNotifier {
     speedCalculator = SpeedCalculator(gps: gps);
   }
 
-  
-
   void startTraining() {
     _hrSamples.clear();
     _startTime = DateTime.now();
     _lastSampleTime = null;
-    
+
     isTraining = true;
 
     _totalTime = Duration.zero;
     _idealZoneTime = Duration.zero;
-    
 
     // Reset metrics
     distanceCalculator.reset();
@@ -102,7 +110,7 @@ class TrainingViewModel extends ChangeNotifier {
       final newZone = logic.calculateZone(hr);
 
       if (lastZone != null && newZone != lastZone) {
-          _vibrateForZone(newZone);
+        _vibrateForZone(newZone);
       }
 
       currentZone = newZone;
@@ -113,27 +121,23 @@ class TrainingViewModel extends ChangeNotifier {
     });
   }
 
-
   Future<void> _vibrateForZone(TrainingZone zone) async {
-  if (!await (Vibration.hasVibrator())) return;
+    if (!await (Vibration.hasVibrator() ?? Future.value(false))) return;
 
-  switch (zone) {
-    case TrainingZone.low:
-      Vibration.vibrate(duration: 2000);   // continuos vibration in 2s
-      break;
-
-    case TrainingZone.ideal:
-      Vibration.vibrate(duration: 600); // 1 kort vibration
-      break;
-
-    case TrainingZone.high:
-      Vibration.vibrate(pattern: [0, 300, 200, 300, 200, 300]); // 3 multiples and kort vibrations
-      break;
+    switch (zone) {
+      case TrainingZone.low:
+        Vibration.vibrate(duration: 2000);
+        break;
+      case TrainingZone.ideal:
+        Vibration.vibrate(duration: 600);
+        break;
+      case TrainingZone.high:
+        Vibration.vibrate(pattern: [0, 300, 200, 300, 200, 300]);
+        break;
+    }
   }
-}
 
-
-  TrainingSession stopTraining() {
+  Future<TrainingSession> stopTraining() async {
     // Stop streams
     movesense.stopHrStream();
     distanceCalculator.stop();
@@ -157,17 +161,15 @@ class TrainingViewModel extends ChangeNotifier {
       distanceMeters: distanceCalculator.state.totalDistanceMeters,
       avgSpeedMps: speedCalculator.state.avgSpeedMps,
       maxSpeedMps: speedCalculator.state.maxSpeedMps,
+      weather: weather, // ✅ gemmer både temp + wind
     );
 
-    repository.addSession(lastSession!);
+    await repository.addSession(lastSession!);
     notifyListeners();
 
     return lastSession!;
   }
 
-
- 
-  //timer
   String get elapsedTimeFormatted {
     if (_startTime == null) return '00:00';
 
@@ -182,8 +184,6 @@ class TrainingViewModel extends ChangeNotifier {
     return (_idealZoneTime.inMilliseconds / _totalTime.inMilliseconds) * 100;
   }
 
-  
-  //ZONE visual info
   String get zoneLabel {
     switch (currentZone) {
       case TrainingZone.low:
@@ -206,7 +206,7 @@ class TrainingViewModel extends ChangeNotifier {
       case TrainingZone.high:
         return Colors.red;
       default:
-        return Colors.grey; // when the data isnt running yet, could mean the device is not connected or data is not beeing recorded
+        return Colors.grey;
     }
   }
 }

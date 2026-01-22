@@ -1,25 +1,32 @@
 import 'package:flutter/material.dart';
 import 'model/app_model.dart';
 import 'model/gps_model.dart';
+import 'model/training_repository.dart';
 import 'view/welcome_page.dart';
 import 'view/home_page.dart';
 import 'view/coach_home_page.dart';
 import 'viewmodel/home_viewmodel.dart';
 import 'viewmodel/coach_viewmodel.dart';
 
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-void main() {
-  runApp(const MyApp());
+  final TrainingRepository repository = TrainingRepository();
+  await repository.load();
+
+  runApp(MyApp(repository: repository));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  final TrainingRepository repository;
+
+  const MyApp({
+    Key? key,
+    required this.repository,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final TrainingRepository repository = TrainingRepository();
- 
-    //example of user      - REMEMBER TO CHANGE HEREEEEEEE
     final MovesenseManager movesenseManager = MovesenseManager();
     final GpsModel gpsModel = GpsModel();
 
@@ -27,6 +34,7 @@ class MyApp extends StatelessWidget {
       id: 'coach1',
       name: 'Coach Ana',
     );
+
     final List<Player> allPlayers = [
       Player(
         id: 'player1',
@@ -48,11 +56,8 @@ class MyApp extends StatelessWidget {
       ),
     ];
 
-
     final Player currentPlayer = allPlayers.first;
 
-    
-         //should i move to viewmodel?
     final HomeViewModel homeViewModel = HomeViewModel(
       player: currentPlayer,
       movesense: movesenseManager,
@@ -65,7 +70,6 @@ class MyApp extends StatelessWidget {
       repository: repository,
     );
 
-   
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'TrainZone',
@@ -74,22 +78,15 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.white,
       ),
       initialRoute: '/',
-
-       
       routes: {
         '/': (context) => WelcomePage(
               homeViewModel: homeViewModel,
               coachViewModel: coachViewModel,
             ),
-
-        
         '/home': (context) => HomePage(
               viewModel: homeViewModel,
-              // NOTE: HomePage will create TrainingViewModel; we pass gps via constructor below
               gpsModel: gpsModel,
             ),
-
-        
         '/coach': (context) => CoachHomePage(
               viewModel: coachViewModel,
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../model/app_model.dart';
+import '../model/training_repository.dart';
 
 class HomeViewModel extends ChangeNotifier {
   final Player player;
@@ -12,24 +13,20 @@ class HomeViewModel extends ChangeNotifier {
     required this.repository,
   });
 
-
   bool isConnecting = false;
   String? errorMessage;
+
   bool get isConnected => movesense.isConnected;
   String? get batteryStatus => movesense.batteryStatus;
 
-  ///last training to HP
-
   TrainingSession? get lastSession {
-  final sessions = repository.getSessionsByPlayer(player.id);
+    final sessions = repository.getSessionsByPlayer(player.id);
+    if (sessions.isEmpty) return null;
 
-  if (sessions.isEmpty) return null;
+    sessions.sort((a, b) => b.date.compareTo(a.date));
+    return sessions.first;
+  }
 
-  sessions.sort((a, b) => b.date.compareTo(a.date));
-  return sessions.first;
-}
-
-  //logic for MS connection
   Future<void> connect() async {
     isConnecting = true;
     errorMessage = null;

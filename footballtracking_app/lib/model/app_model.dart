@@ -1,6 +1,6 @@
+import 'weather_model.dart';
 import 'dart:async';
 import 'package:movesense_plus/movesense_plus.dart';
-
 
 class Player {
   final String id;
@@ -44,7 +44,6 @@ class Coach {
   });
 }
 
-
 enum TrainingZone {
   low,
   ideal,
@@ -56,7 +55,7 @@ class TrainingLogic {
 
   TrainingLogic({required this.player});
 
-  int get maxHr => 220 - player.age;  ///look 
+  int get maxHr => 220 - player.age;
 
   TrainingZone calculateZone(int hr) {
     final double percent = hr / maxHr;
@@ -71,7 +70,6 @@ class TrainingLogic {
   }
 }
 
-
 class TrainingSession {
   final String playerId;
   final double avgHr;
@@ -82,10 +80,12 @@ class TrainingSession {
   /// GPS distance in meters (optional)
   final double? distanceMeters;
 
-  /// NEW: speed metrics (optional)
-  /// Stored as meters/second for consistency
+  /// Speed metrics (optional) stored as meters/second
   final double? avgSpeedMps;
   final double? maxSpeedMps;
+
+  /// Weather (optional)
+  final WeatherData? weather;
 
   TrainingSession({
     required this.playerId,
@@ -96,6 +96,7 @@ class TrainingSession {
     this.distanceMeters,
     this.avgSpeedMps,
     this.maxSpeedMps,
+    this.weather,
   });
 
   /// Convenience getters for UI
@@ -104,27 +105,46 @@ class TrainingSession {
 
   double? get avgSpeedKmh => avgSpeedMps == null ? null : avgSpeedMps! * 3.6;
   double? get maxSpeedKmh => maxSpeedMps == null ? null : maxSpeedMps! * 3.6;
-}
 
-
-// "save" data training, change to DataManager when implementing database. obs: store.record(xxx.id:xx.toJson());
-class TrainingRepository {
-  final List<TrainingSession> _sessions = [];
-
-  void addSession(TrainingSession session) {
-    _sessions.add(session);
+  String get weatherText {
+    if (weather == null) return '--';
+    return '${weather!.temperatureC.toStringAsFixed(1)}°C, '
+        '${weather!.windSpeedMps.toStringAsFixed(1)} m/s';
   }
 
-  List<TrainingSession> getSessionsByPlayer(String playerId) {
-    return _sessions.where((s) => s.playerId == playerId).toList();
-  }
+  /// JSON (optional – for saving sessions)
+  Map<String, dynamic> toJson() => {
+        'playerId': playerId,
+        'avgHr': avgHr,
+        'durationMs': duration.inMilliseconds,
+        'dateIso': date.toIso8601String(),
+        'idealZonePercentage': idealZonePercentage,
+        'distanceMeters': distanceMeters,
+        'avgSpeedMps': avgSpeedMps,
+        'maxSpeedMps': maxSpeedMps,
+        'weather': weather?.toJson(),
+      };
+
+  factory TrainingSession.fromJson(Map<String, dynamic> json) => TrainingSession(
+        playerId: json['playerId'] as String,
+        avgHr: (json['avgHr'] as num).toDouble(),
+        duration: Duration(milliseconds: (json['durationMs'] as num).toInt()),
+        date: DateTime.parse(json['dateIso'] as String),
+        idealZonePercentage: (json['idealZonePercentage'] as num).toDouble(),
+        distanceMeters: (json['distanceMeters'] as num?)?.toDouble(),
+        avgSpeedMps: (json['avgSpeedMps'] as num?)?.toDouble(),
+        maxSpeedMps: (json['maxSpeedMps'] as num?)?.toDouble(),
+        weather: json['weather'] == null
+            ? null
+            : WeatherData.fromJson(json['weather'] as Map<String, dynamic>),
+      );
 }
 
-
-class MovesenseManager {            //Controller           - move to another file 
-  static const String macAddress = '0C:8C:DC:1B:23:1F';   //change here if we use Amins Movesense
+class MovesenseManager {
+  static const String macAddress = '0C:8C:DC:1B:23:61'; // change if needed
   MovesenseDevice? _device;
   StreamSubscription<MovesenseHR>? _hrSub;
+
   String? batteryStatus;
   bool get isConnected => _device != null;
 
@@ -137,9 +157,9 @@ class MovesenseManager {            //Controller           - move to another fil
   }
 
   Future<void> disconnect() async {
-    stopHrStream();              
-    _device?.disconnect();       
-    _device = null;                   
+    stopHrStream();
+    _device?.disconnect();
+    _device = null;
     batteryStatus = null;
   }
 

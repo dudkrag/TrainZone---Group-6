@@ -29,6 +29,11 @@ class HomePage extends StatelessWidget {
             final player = viewModel.player;
             final last = viewModel.lastSession;
 
+            // Weather values from last session (if any)
+            final w = last?.weather;
+            final tempText = (w == null) ? '--' : '${w.temperatureC.toStringAsFixed(1)}°C';
+            final windText = (w == null) ? '--' : '${w.windSpeedMps.toStringAsFixed(1)} m/s';
+
             return Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -151,6 +156,39 @@ class HomePage extends StatelessWidget {
                               value: last?.distanceKm == null ? '--' : last!.distanceKm!.toStringAsFixed(2),
                               label: 'km',
                             ),
+                            _Metric(
+                              value: last?.avgSpeedKmh == null ? '--' : last!.avgSpeedKmh!.toStringAsFixed(1),
+                              label: 'avg km/h',
+                            ),
+                          ],
+                        ),
+
+                        // WEATHER SECTION (nice)
+                        const SizedBox(height: 16),
+                        const Divider(height: 1),
+                        const SizedBox(height: 12),
+
+                        Row(
+                          children: const [
+                            Icon(Icons.cloud_outlined, size: 18, color: Colors.black87),
+                            SizedBox(width: 8),
+                            Text(
+                              'Weather',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _Metric(value: tempText, label: 'Temp'),
+                            _Metric(value: windText, label: 'Wind'),
                           ],
                         ),
                       ],
@@ -250,10 +288,6 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-
-/// =====================
-/// REUSABLE WIDGETS
-/// =====================
 
 class _Card extends StatelessWidget {
   final Widget child;

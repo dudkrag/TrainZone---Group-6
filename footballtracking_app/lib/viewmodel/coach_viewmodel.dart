@@ -1,9 +1,10 @@
 import '../model/app_model.dart';
+import '../model/training_repository.dart';
 
 class CoachViewModel {
   final Coach coach;
   final List<Player> allPlayers;
-  final TrainingRepository repository; // 🔥 FALTAVA ISSO
+  final TrainingRepository repository;
 
   CoachViewModel({
     required this.coach,
@@ -12,23 +13,11 @@ class CoachViewModel {
   });
 
   List<TrainingSession> getAuthorizedSessions(Player player) {
-  if (!player.permissions.trainingHistory) {
-    return [];
+    if (!player.permissions.trainingHistory) return [];
+    return repository.getSessionsByPlayer(player.id);
   }
 
-  return repository.getSessionsByPlayer(player.id);
-
-  
-}
-
-
-
-
-
-  /// Jogadores associados ao coach
   List<Player> get playersOfCoach {
-    return allPlayers
-        .where((p) => p.coachId == coach.id)
-        .toList();
+    return allPlayers.where((p) => p.coachId == coach.id).toList();
   }
 }

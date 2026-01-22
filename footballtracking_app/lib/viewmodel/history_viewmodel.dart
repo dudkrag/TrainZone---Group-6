@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../model/app_model.dart';
+import '../model/training_repository.dart';
 
 class HistoryViewModel extends ChangeNotifier {
   final TrainingRepository repository;
@@ -10,7 +11,6 @@ class HistoryViewModel extends ChangeNotifier {
     required this.player,
   });
 
-  /// Lista de treinos do jogador
   List<TrainingSession> get history {
     return repository.getSessionsByPlayer(player.id);
   }
