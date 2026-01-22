@@ -10,19 +10,32 @@ class CoachPlayerViewModel {
     required this.repository,
   });
 
+  /// Permissions
+  bool get canSeeHistory => player.permissions.trainingHistory;
+  bool get canSeeHr => player.permissions.heartRate;
+  bool get canSeeZones => player.permissions.trainingZones;
+
+  /// Sessions (newest first). Empty if player disabled sharing history.
   List<TrainingSession> get sessions {
-    return repository.getSessionsByPlayer(player.id);
+    if (!canSeeHistory) return [];
+    final list = repository.getSessionsByPlayer(player.id);
+    list.sort((a, b) => b.date.compareTo(a.date));
+    return list;
   }
 
   double get averageHr {
-    if (sessions.isEmpty) return 0;
-    final sum = sessions.map((s) => s.avgHr).fold<double>(0, (a, b) => a + b);
-    return sum / sessions.length;
+    if (!canSeeHr) return 0;
+    final s = sessions;
+    if (s.isEmpty) return 0;
+    final sum = s.map((x) => x.avgHr).fold<double>(0, (a, b) => a + b);
+    return sum / s.length;
   }
 
   double get averageSpeedKmh {
-    final speeds = sessions
-        .map((s) => s.avgSpeedKmh)
+    final s = sessions;
+
+    final speeds = s
+        .map((x) => x.avgSpeedKmh)
         .where((v) => v != null)
         .cast<double>()
         .toList();
@@ -33,13 +46,16 @@ class CoachPlayerViewModel {
   }
 
   double get maxSpeedKmh {
-    final speeds = sessions
-        .map((s) => s.maxSpeedKmh)
+    final s = sessions;
+
+    final speeds = s
+        .map((x) => x.maxSpeedKmh)
         .where((v) => v != null)
         .cast<double>()
         .toList();
 
     if (speeds.isEmpty) return 0;
+
     double max = speeds.first;
     for (final v in speeds) {
       if (v > max) max = v;
@@ -48,14 +64,14 @@ class CoachPlayerViewModel {
   }
 
   double? get lastTemperatureC {
-    if (sessions.isEmpty) return null;
-    sessions.sort((a, b) => b.date.compareTo(a.date));
-    return sessions.first.weather?.temperatureC;
+    final s = sessions;
+    if (s.isEmpty) return null;
+    return s.first.weather?.temperatureC;
   }
 
   double? get lastWindMps {
-    if (sessions.isEmpty) return null;
-    sessions.sort((a, b) => b.date.compareTo(a.date));
-    return sessions.first.weather?.windSpeedMps;
+    final s = sessions;
+    if (s.isEmpty) return null;
+    return s.first.weather?.windSpeedMps;
   }
 }

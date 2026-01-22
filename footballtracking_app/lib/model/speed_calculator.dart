@@ -3,8 +3,8 @@ import 'dart:math';
 import 'gps_model.dart';
 
 class SpeedState {
-  final double currentSpeedMps; // øjeblikkelig (glattet)
-  final double avgSpeedMps;     // tid-vægtet
+  final double currentSpeedMps; // display speed (stabil, live)
+  final double avgSpeedMps;     // distance / time
   final double maxSpeedMps;
 
   const SpeedState({
@@ -17,107 +17,148 @@ class SpeedState {
   double get avgKmh => avgSpeedMps * 3.6;
   double get maxKmh => maxSpeedMps * 3.6;
 
-  static const zero = SpeedState(
-    currentSpeedMps: 0,
-    avgSpeedMps: 0,
-    maxSpeedMps: 0,
-  );
+  static const zero = SpeedState(currentSpeedMps: 0, avgSpeedMps: 0, maxSpeedMps: 0);
 }
 
 class SpeedCalculator {
   final GpsModel gps;
-
   StreamSubscription<GpsPoint>? _sub;
 
   SpeedState state = SpeedState.zero;
 
-  // Til avg-speed beregning
-  double _distanceMetersForAvg = 0;
-  Duration _timeForAvg = Duration.zero;
-
-  // Sidste punkt til fallback-beregning
   GpsPoint? _last;
 
-  // Glatning (EMA)
-  double _emaSpeedMps = 0.0;
-  final double smoothingAlpha; // 0..1
+  // Distance/time for avg
+  double _distForAvg = 0.0;
+  Duration _timeForAvg = Duration.zero;
 
-  // Filtre
-  final double maxReasonableSpeedMps; // fx 12 m/s ~ 43 km/t
-  final double maxAccuracyMeters;     // discard hvis dårlig GPS
-  final Duration minDeltaTime;        // undgå micro-dt
-  final double minDistanceForAvgMeters;
+  // Display smoothing
+  double _displayEmaMps = 0.0;
+
+  // "Zero lock" hysteresis
+  bool _lockedZero = true;
+  Duration _belowThresholdTime = Duration.zero;
+
+  // Tuning knobs (defaults tuned for running + walking outdoors)
+  final double maxAccuracyMeters;          // ignore worse points
+  final Duration minDeltaTime;             // avoid micro dt
+  final double maxReasonableSpeedMps;      // reject jumps
+  final double minMoveMetersGood;          // movement threshold when accuracy is good
+  final double minMoveMetersNoisy;         // movement threshold when accuracy is noisy
+  final double emaAlpha;                   // responsiveness
+  final double zeroLockKmh;                // below this, tend to lock to 0
+  final double unlockKmh;                  // must exceed this to unlock from 0
+  final Duration zeroLockDelay;            // how long below threshold before locking
 
   SpeedCalculator({
     required this.gps,
-    this.smoothingAlpha = 0.25,
-    this.maxReasonableSpeedMps = 12.0,
-    this.maxAccuracyMeters = 20.0,
-    this.minDeltaTime = const Duration(milliseconds: 700),
-    this.minDistanceForAvgMeters = 2.0,
+    this.maxAccuracyMeters = 25.0,
+    this.minDeltaTime = const Duration(milliseconds: 900),
+    this.maxReasonableSpeedMps = 12.0,     // ~43 km/h
+    this.minMoveMetersGood = 1.2,
+    this.minMoveMetersNoisy = 2.8,
+    this.emaAlpha = 0.22,                  // feels “real-time” but stable
+    this.zeroLockKmh = 1.2,                // below 1.2 km/h => push toward zero
+    this.unlockKmh = 2.2,                  // must exceed 2.2 km/h to show moving
+    this.zeroLockDelay = const Duration(seconds: 2),
   });
 
   void reset() {
     stop();
-
     state = SpeedState.zero;
-
-    _distanceMetersForAvg = 0;
-    _timeForAvg = Duration.zero;
-
     _last = null;
-    _emaSpeedMps = 0.0;
+    _distForAvg = 0.0;
+    _timeForAvg = Duration.zero;
+    _displayEmaMps = 0.0;
+    _lockedZero = true;
+    _belowThresholdTime = Duration.zero;
   }
 
   void start(void Function(SpeedState) onUpdate) {
     stop();
 
     _sub = gps.stream.listen((p) {
-      // filtrér noisy GPS
+      // Hard reject very bad GPS
       if (p.accuracy > maxAccuracyMeters) return;
 
-      final rawSpeedMps = _computeSpeedMps(p);
-      if (rawSpeedMps.isNaN) return;
+      if (_last == null) {
+        _last = p;
+        return;
+      }
 
-      // discard urealistiske spikes
-      final clamped = rawSpeedMps.clamp(0.0, maxReasonableSpeedMps);
+      final dt = p.timestamp.difference(_last!.timestamp);
+      if (dt < minDeltaTime) {
+        _last = p;
+        return;
+      }
 
-      // EMA smoothing
-      _emaSpeedMps = (_emaSpeedMps == 0.0)
-          ? clamped
-          : (smoothingAlpha * clamped) + ((1 - smoothingAlpha) * _emaSpeedMps);
+      final seconds = dt.inMilliseconds / 1000.0;
+      if (seconds <= 0) {
+        _last = p;
+        return;
+      }
 
-      // Update avg (tid-vægtet) baseret på distance mellem punkter
-      if (_last != null) {
-        final dt = p.timestamp.difference(_last!.timestamp);
-        if (dt >= minDeltaTime) {
-          final d = _haversineMeters(_last!.lat, _last!.lon, p.lat, p.lon);
+      final d = _haversineMeters(_last!.lat, _last!.lon, p.lat, p.lon);
 
-          if (d >= minDistanceForAvgMeters) {
-            final seconds = dt.inMilliseconds / 1000.0;
-            if (seconds > 0) {
-              final implied = d / seconds;
+      // Movement threshold depends on accuracy
+      final minMove = (p.accuracy <= 15.0) ? minMoveMetersGood : minMoveMetersNoisy;
 
-              // samme jump-filter som distance
-              if (implied <= maxReasonableSpeedMps) {
-                _distanceMetersForAvg += d;
-                _timeForAvg += dt;
-              }
-            }
+      // If almost no movement, raw speed is 0
+      double rawMps = 0.0;
+      if (d >= minMove) {
+        rawMps = d / seconds;
+      }
+
+      // Reject jumps (position spikes)
+      if (rawMps > maxReasonableSpeedMps) {
+        _last = p;
+        return;
+      }
+
+      // Update avg only when we accept a plausible segment
+      if (rawMps > 0) {
+        _distForAvg += d;
+        _timeForAvg += dt;
+      }
+
+      // Two-step: smooth raw into display speed
+      _displayEmaMps = _ema(rawMps, _displayEmaMps);
+
+      // Apply zero-lock hysteresis to eliminate “walking in house shows 7 km/h”
+      final displayKmh = _displayEmaMps * 3.6;
+
+      if (_lockedZero) {
+        // Only unlock if we clearly exceed unlock threshold
+        if (displayKmh >= unlockKmh) {
+          _lockedZero = false;
+          _belowThresholdTime = Duration.zero;
+        } else {
+          _displayEmaMps = 0.0;
+        }
+      } else {
+        // If we fall below zeroLockKmh for long enough, lock to zero
+        if (displayKmh < zeroLockKmh) {
+          _belowThresholdTime += dt;
+          if (_belowThresholdTime >= zeroLockDelay) {
+            _lockedZero = true;
+            _displayEmaMps = 0.0;
+            _belowThresholdTime = Duration.zero;
           }
+        } else {
+          _belowThresholdTime = Duration.zero;
         }
       }
 
-      final avgMps = _timeForAvg.inMilliseconds == 0
+      final avgMps = (_timeForAvg.inMilliseconds == 0)
           ? 0.0
-          : _distanceMetersForAvg / (_timeForAvg.inMilliseconds / 1000.0);
+          : _distForAvg / (_timeForAvg.inMilliseconds / 1000.0);
 
-      final maxMps = max(state.maxSpeedMps, _emaSpeedMps);
+      final newMax = max(state.maxSpeedMps, _displayEmaMps);
 
       state = SpeedState(
-        currentSpeedMps: _emaSpeedMps,
+        currentSpeedMps: _displayEmaMps,
         avgSpeedMps: avgMps,
-        maxSpeedMps: maxMps,
+        maxSpeedMps: newMax,
       );
 
       _last = p;
@@ -130,30 +171,19 @@ class SpeedCalculator {
     _sub = null;
   }
 
-  double _computeSpeedMps(GpsPoint p) {
-    // Primært: brug sensor speed hvis tilgængeligt
-    if (p.speedMps > 0) return p.speedMps;
-
-    // Fallback: beregn fra lat/lon
-    if (_last == null) return 0.0;
-
-    final dt = p.timestamp.difference(_last!.timestamp);
-    if (dt.inMilliseconds <= 0) return 0.0;
-
-    final d = _haversineMeters(_last!.lat, _last!.lon, p.lat, p.lon);
-    return d / (dt.inMilliseconds / 1000.0);
+  double _ema(double x, double prev) {
+    if (prev == 0.0) return x;
+    return (emaAlpha * x) + ((1.0 - emaAlpha) * prev);
   }
 
   double _haversineMeters(double lat1, double lon1, double lat2, double lon2) {
-    const r = 6371000.0; // earth radius meters
+    const r = 6371000.0;
     final dLat = _deg2rad(lat2 - lat1);
     final dLon = _deg2rad(lon2 - lon1);
 
     final a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_deg2rad(lat1)) *
-            cos(_deg2rad(lat2)) *
-            sin(dLon / 2) *
-            sin(dLon / 2);
+        cos(_deg2rad(lat1)) * cos(_deg2rad(lat2)) *
+            sin(dLon / 2) * sin(dLon / 2);
 
     final c = 2 * atan2(sqrt(a), sqrt(1 - a));
     return r * c;

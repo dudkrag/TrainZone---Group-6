@@ -29,7 +29,10 @@ class CoachHomePage extends StatelessWidget {
                 final player = players[index];
 
                 return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   child: ListTile(
                     leading: const Icon(Icons.person),
                     title: Text(player.name),

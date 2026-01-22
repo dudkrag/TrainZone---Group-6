@@ -11,8 +11,11 @@ class HistoryViewModel extends ChangeNotifier {
     required this.player,
   });
 
+  /// Newest sessions first
   List<TrainingSession> get history {
-    return repository.getSessionsByPlayer(player.id);
+    final list = repository.getSessionsByPlayer(player.id);
+    list.sort((a, b) => b.date.compareTo(a.date));
+    return list;
   }
 
   bool get isEmpty => history.isEmpty;
