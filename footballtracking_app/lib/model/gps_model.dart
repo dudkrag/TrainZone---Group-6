@@ -18,7 +18,7 @@ class GpsPoint {
   });
 
   factory GpsPoint.fromPosition(Position p) {
-    final ts = p.timestamp ?? DateTime.now();
+    final ts = p.timestamp;
 
     final spd = (p.speed.isNaN || p.speed < 0) ? 0.0 : p.speed;
 
