@@ -113,7 +113,7 @@ class TrainingRepository {
 
 
 class ExportService {
-  /// Export all training S as JSON + Saved directly in Android Downloads folder
+  /// Export all training S as JSON + Saved directly in mobil folder
   static Future<File> exportPlayerSessions({
     required Player player,
     required List<TrainingSession> sessions,

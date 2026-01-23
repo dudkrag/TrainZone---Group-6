@@ -1,7 +1,15 @@
 import 'dart:async';
 import 'package:movesense_plus/movesense_plus.dart';
 
-class MovesenseManager {            //Controller, Facade    
+abstract class HealthSensorFacade {
+  Future<void> connect();
+  Future<void> disconnect();
+  void startHrStream(void Function(int hr) onData);
+  void stopHrStream();
+  bool get isConnected;
+}
+
+class MovesenseManager implements HealthSensorFacade{            //Controller, Facade    
   static const String macAddress = '0C:8C:DC:1B:23:1F';   //change here if we use Amins Movesense
   MovesenseDevice? _device;
   StreamSubscription<MovesenseHR>? _hrSub;
