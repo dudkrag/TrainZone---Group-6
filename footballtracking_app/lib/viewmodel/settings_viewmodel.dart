@@ -49,7 +49,7 @@ class SettingsViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 🔥 ISSO ESTAVA FALTANDO
+  
   Future<void> save() async {
     await repository.update(player);
   }

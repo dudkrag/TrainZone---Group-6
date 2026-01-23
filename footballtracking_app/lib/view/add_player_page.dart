@@ -14,7 +14,6 @@ class _AddPlayerPageState extends State<AddPlayerPage> {
   final _nameCtrl = TextEditingController();
   final _ageCtrl = TextEditingController();
   final _positionCtrl = TextEditingController();
-  final _restHrCtrl = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +36,7 @@ class _AddPlayerPageState extends State<AddPlayerPage> {
               controller: _positionCtrl,
               decoration: const InputDecoration(labelText: 'Position'),
             ),
-            TextField(
-              controller: _restHrCtrl,
-              decoration: const InputDecoration(labelText: 'Resting HR'),
-              keyboardType: TextInputType.number,
-            ),
+            
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
@@ -50,7 +45,7 @@ class _AddPlayerPageState extends State<AddPlayerPage> {
                   name: _nameCtrl.text,
                   age: int.parse(_ageCtrl.text),
                   position: _positionCtrl.text,
-                  restingHr: int.parse(_restHrCtrl.text),
+                  
                   coachId: '', 
                   permissions: DataPermissions(),
                 );

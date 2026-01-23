@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:movesense_plus/movesense_plus.dart';
 
-class MovesenseManager {            //Controller           
+class MovesenseManager {            //Controller, Facade    
   static const String macAddress = '0C:8C:DC:1B:23:1F';   //change here if we use Amins Movesense
   MovesenseDevice? _device;
   StreamSubscription<MovesenseHR>? _hrSub;

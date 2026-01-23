@@ -28,7 +28,7 @@ class TrainingViewModel extends ChangeNotifier {
 
   bool isTraining = false;
 
-  /// TIME ACCUMULATORS
+ 
   Duration _totalTime = Duration.zero;
   Duration _lowZoneTime = Duration.zero;
   Duration _idealZoneTime = Duration.zero;
@@ -47,9 +47,7 @@ class TrainingViewModel extends ChangeNotifier {
     speedCalculator = SpeedCalculator(gps: gps);
   }
 
-  /// =====================
-  /// DISTANCE & SPEED (EXPOSED)
-  /// =====================
+
   double get distanceMeters =>
       distanceCalculator.state.totalDistanceMeters;
 

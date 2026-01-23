@@ -30,7 +30,7 @@ class WelcomePage extends StatelessWidget {
             ),
             const SizedBox(height: 40),
 
-            /// PLAYER LOGIN
+            ///P
             SizedBox(
               width: 200,
               child: OutlinedButton(
@@ -51,7 +51,7 @@ class WelcomePage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            /// COACH LOGIN
+            ///C
             SizedBox(
               width: 200,
               child: OutlinedButton(

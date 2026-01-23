@@ -28,9 +28,7 @@ class SummaryPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            /// =====================
-            /// HEADER
-            /// =====================
+            
             const Text(
               'Session Completed',
               style: TextStyle(
@@ -41,9 +39,7 @@ class SummaryPage extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            /// =====================
-            /// BASIC METRICS
-            /// =====================
+          
             _MetricRow(
               label: 'Duration',
               value: '${session.duration.inMinutes} min',
@@ -55,9 +51,8 @@ class SummaryPage extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            /// =====================
-            /// ZONES
-            /// =====================
+            
+
             const Text(
               'Time in Training Zones',
               style: TextStyle(
@@ -86,9 +81,8 @@ class SummaryPage extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            /// =====================
-            /// GPS
-            /// =====================
+            
+            
             if (session.distanceKm != null)
               _MetricRow(
                 label: 'Distance',

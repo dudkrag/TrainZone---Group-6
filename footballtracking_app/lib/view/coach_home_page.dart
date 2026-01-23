@@ -19,7 +19,7 @@ class _CoachHomePageState extends State<CoachHomePage> {
   @override
   void initState() {
     super.initState();
-    widget.viewModel.loadPlayers(); // 🔥 AQUI
+    widget.viewModel.loadPlayers(); 
   }
 
   @override

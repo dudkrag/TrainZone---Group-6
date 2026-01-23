@@ -8,7 +8,7 @@ import '../model/storage.dart';
 class CoachLoginPage extends StatelessWidget {
   final CoachLoginViewModel viewModel;
   final TrainingRepository trainingRepository;
-  final PlayerRepository playerRepository; // 🔥 MUDOU
+  final PlayerRepository playerRepository; 
 
   const CoachLoginPage({
     Key? key,
@@ -61,8 +61,8 @@ class CoachLoginPage extends StatelessWidget {
                         builder: (_) => CoachHomePage(
                           viewModel: CoachViewModel(
                             coach: coach,
-                            trainingRepository: trainingRepository, // ✅
-                            playerRepository: playerRepository,     // ✅
+                            trainingRepository: trainingRepository, 
+                            playerRepository: playerRepository,     
                           ),
                         ),
                       ),

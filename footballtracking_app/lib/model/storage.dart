@@ -41,7 +41,6 @@ class PlayerRepository {
         .toList();
   }
 
-  /// Add new player
   Future<void> add(Player player) async {
     await _store.add(await _db, player.toJson());
   }
@@ -57,13 +56,11 @@ class PlayerRepository {
 }
 
 
-
 class CoachRepository {
   final _store = stringMapStoreFactory.store('coaches');
 
   Future<Database> get _db async => AppDatabase().database;
 
-  /// Get all coaches
   Future<List<Coach>> getAll() async {
     final records = await _store.find(await _db);
 
@@ -72,7 +69,6 @@ class CoachRepository {
         .toList();
   }
 
-  /// Add new coach
   Future<void> add(Coach coach) async {
     await _store.record(coach.id).put(
       await _db,
@@ -80,7 +76,6 @@ class CoachRepository {
     );
   }
 
-  /// Update coach
   Future<void> update(Coach coach) async {
     await _store.record(coach.id).put(
       await _db,
@@ -88,17 +83,8 @@ class CoachRepository {
     );
   }
 
-  /// Optional: delete
-  Future<void> delete(String id) async {
-    await _store.record(id).delete(await _db);
-  }
 }
 
-
-
-
-
-// "save" data training, change to DataManager when implementing database. obs: store.record(xxx.id:xx.toJson());
 
 class TrainingRepository {
   final _store = intMapStoreFactory.store('training_sessions');
@@ -127,8 +113,7 @@ class TrainingRepository {
 
 
 class ExportService {
-  /// Export all training sessions of one player as JSON
-  /// Saved directly in Android Downloads folder
+  /// Export all training S as JSON + Saved directly in Android Downloads folder
   static Future<File> exportPlayerSessions({
     required Player player,
     required List<TrainingSession> sessions,
@@ -140,10 +125,7 @@ class ExportService {
       'sessions': sessions.map((s) => s.toJson()).toList(),
     };
 
-    /// 📁 Public Downloads folder (Android)
-    final directory = Directory('/storage/emulated/0/Download');
-
-    /// 🧠 Safety check
+    final directory = Directory('/storage/emulated/0/Download'); //check
     if (!directory.existsSync()) {
       throw Exception('Download directory not found');
     }
@@ -152,7 +134,6 @@ class ExportService {
       '${directory.path}/player_${player.id}_sessions.json',
     );
 
-    /// Pretty JSON (easy to read + Python friendly)
     final jsonString = const JsonEncoder.withIndent('  ').convert(jsonData);
 
     return await file.writeAsString(jsonString);

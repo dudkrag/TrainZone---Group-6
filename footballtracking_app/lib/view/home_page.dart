@@ -92,9 +92,7 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  /// =====================
-                  /// PLAYER CARD
-                  /// =====================
+                  //P
                   _Card(
                     child: Row(
                       children: [
@@ -124,9 +122,7 @@ class _HomePageState extends State<HomePage> {
 
                   const SizedBox(height: 16),
 
-                  /// =====================
-                  /// LAST SESSION CARD
-                  /// =====================
+                 //LS
                   _Card(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,9 +161,7 @@ class _HomePageState extends State<HomePage> {
 
                   const SizedBox(height: 16),
 
-                  /// =====================
-                  /// 🔥 MOVESENSE CARD (RESTORED)
-                  /// =====================
+                 //M
                   Card(
                     child: ListTile(
                       leading: Icon(
@@ -223,9 +217,7 @@ class _HomePageState extends State<HomePage> {
 
                   const Spacer(),
 
-                  /// =====================
-                  /// ACTION BUTTONS
-                  /// =====================
+                 
                   Row(
                     children: [
                       Expanded(
@@ -288,9 +280,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-/// =====================
-/// REUSABLE WIDGETS
-/// =====================
+//widgets
 
 class _Card extends StatelessWidget {
   final Widget child;

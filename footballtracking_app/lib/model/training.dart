@@ -96,9 +96,7 @@ class TrainingSession {
     );
   }
 
-  /// =====================
-  /// CONVENIENCE GETTERS
-  /// =====================
+ //getters Amin
   double? get distanceKm =>
       distanceMeters == null ? null : distanceMeters! / 1000.0;
 

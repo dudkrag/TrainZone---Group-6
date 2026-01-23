@@ -19,7 +19,7 @@ class CoachViewModel extends ChangeNotifier {
 
   List<Player> get playersOfCoach => _players;
 
-  /// 🔥 CARREGA PLAYERS ASSOCIADOS AO COACH
+  
   Future<void> loadPlayers() async {
     isLoading = true;
     notifyListeners();
@@ -34,7 +34,7 @@ class CoachViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 🔒 RESPEITA PERMISSÕES
+
   Future<List<TrainingSession>> getAuthorizedSessions(Player player) async {
     if (!player.permissions.trainingHistory) return [];
     return await trainingRepository.getSessionsByPlayer(player.id);

@@ -13,9 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
 
 
-    // =========================
-    // GLOBAL SINGLETONS
-    // =========================
+    //global singletons
     final TrainingRepository trainingRepository = TrainingRepository();
     final PlayerRepository playerRepository = PlayerRepository();
     final CoachRepository coachRepository = CoachRepository();

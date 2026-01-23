@@ -4,7 +4,7 @@ class Player {
   String position;
   String coachId;
   int age;
-  int restingHr;
+
   DataPermissions permissions;
 
   Player({
@@ -13,7 +13,7 @@ class Player {
     required this.position,
     required this.coachId,
     required this.age,
-    required this.restingHr,
+    
     required this.permissions,
   });
 
@@ -23,7 +23,7 @@ class Player {
     'position': position,
     'coachId': coachId,
     'age': age,
-    'restingHr': restingHr,
+    
     'permissions': permissions.toJson(),
   };
 
@@ -34,7 +34,7 @@ class Player {
       position: json['position'],
       coachId: json['coachId'],
       age: json['age'],
-      restingHr: json['restingHr'],
+      
       permissions: DataPermissions.fromJson(json['permissions']),
     );
   }

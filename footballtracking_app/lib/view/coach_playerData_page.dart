@@ -17,7 +17,7 @@ class _CoachPlayerPageState extends State<CoachPlayerPage> {
   @override
   void initState() {
     super.initState();
-    widget.viewModel.loadSessions(); // 🔥 ESSENCIAL
+    widget.viewModel.loadSessions();
   }
 
   @override
@@ -29,14 +29,14 @@ class _CoachPlayerPageState extends State<CoachPlayerPage> {
       body: ListenableBuilder(
         listenable: widget.viewModel,
         builder: (context, _) {
-          /// 🔄 LOADING
+          
           if (widget.viewModel.isLoading) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
 
-          /// 🔒 PERMISSION BLOCK
+          ///PERMISSION BLOCK
           if (!widget.viewModel.canSeeHistory) {
             return const Center(
               child: Text(
@@ -46,14 +46,14 @@ class _CoachPlayerPageState extends State<CoachPlayerPage> {
             );
           }
 
-          /// 📭 EMPTY STATE
+          ///empty
           if (widget.viewModel.sessions.isEmpty) {
             return const Center(
               child: Text('No training sessions recorded'),
             );
           }
 
-          /// 📊 DATA
+          
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: widget.viewModel.sessions.length,

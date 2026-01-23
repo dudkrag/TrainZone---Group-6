@@ -15,18 +15,12 @@ class CoachPlayerViewModel extends ChangeNotifier {
     required this.repository,
   });
 
-  /// =====================
-  /// PERMISSIONS (EXPOSED TO VIEW)
-  /// =====================
+  //permissions
   bool get canSeeHistory => player.permissions.trainingHistory;
-
   bool get canSeeHeartRate => player.permissions.heartRate;
-
   bool get canSeeZones => player.permissions.trainingZones;
 
-  /// =====================
-  /// LOAD DATA
-  /// =====================
+  
   Future<void> loadSessions() async {
     isLoading = true;
     notifyListeners();

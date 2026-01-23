@@ -22,11 +22,11 @@ class HomeViewModel extends ChangeNotifier {
   bool get isConnected => movesense.isConnected;
   String? get batteryStatus => movesense.batteryStatus;
 
-  /// 🔹 Última sessão salva (vinda do banco)
+ 
   TrainingSession? lastSession;
   bool isLoadingLastSession = false;
 
-  /// 🔹 Carrega a última sessão do jogador
+  
   Future<void> loadLastSession() async {
     isLoadingLastSession = true;
     notifyListeners();
@@ -44,9 +44,7 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // =========================
-  // Movesense connection
-  // =========================
+ 
 
   Future<void> connect() async {
     isConnecting = true;
@@ -70,7 +68,7 @@ class HomeViewModel extends ChangeNotifier {
       await movesense.disconnect();
       notifyListeners();
     } catch (e) {
-      errorMessage = 'error desconnection movesense';
+      errorMessage = 'error disconnection movesense';
       notifyListeners();
     }
   }
