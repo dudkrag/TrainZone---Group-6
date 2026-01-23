@@ -10,7 +10,7 @@ import '../model/storage.dart';
 
 class TrainingViewModel extends ChangeNotifier {
   final Player player;
-  final MovesenseManager movesense;
+  final HealthSensorFacade sensor;
   final TrainingRepository repository;
   final GpsModel gps;
 
@@ -38,7 +38,7 @@ class TrainingViewModel extends ChangeNotifier {
 
   TrainingViewModel({
     required this.player,
-    required this.movesense,
+    required this.sensor,
     required this.repository,
     required this.gps,
   }) {
@@ -82,7 +82,7 @@ class TrainingViewModel extends ChangeNotifier {
     distanceCalculator.start((_) => notifyListeners());
     speedCalculator.start((_) => notifyListeners());
 
-    movesense.startHrStream((hr) {
+    sensor.startHrStream((hr) {
       final now = DateTime.now();
 
       if (_lastSampleTime != null) {
@@ -122,7 +122,7 @@ class TrainingViewModel extends ChangeNotifier {
   }
 
   TrainingSession stopTraining() {
-    movesense.stopHrStream();
+    sensor.stopHrStream();
     gps.stop();
     distanceCalculator.stop();
     speedCalculator.stop();

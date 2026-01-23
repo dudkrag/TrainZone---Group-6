@@ -253,7 +253,7 @@ class _HomePageState extends State<HomePage> {
                                         viewModel: TrainingViewModel(
                                           player:
                                               widget.viewModel.player,
-                                          movesense:
+                                          sensor:
                                               widget.viewModel.movesense,
                                           repository:
                                               widget.trainingRepository,
