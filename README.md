@@ -47,9 +47,11 @@ For players, the application provides a home screen with an overview of sensor c
 
 Coaches can access historical training data of players who have granted permission, enabling an overview of player workload and supporting planning of future training sessions and matches.
 
-* **Final Wireframe/**
+* **Final Wireframe create in Figma/**
 
   <img width="8050" height="5602" alt="Wireframe Final" src="https://github.com/user-attachments/assets/48e52937-535f-4cc0-8bbc-4c005db89a07" />
+
+  link to Figma: https://www.figma.com/design/4UgHvgL87v7E80QsewXXpT/TrainZone?node-id=0-1&t=0b47lQVC42A3gtbk-1
 
 
 
