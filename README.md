@@ -47,7 +47,7 @@ For players, the application provides a home screen with an overview of sensor c
 
 Coaches can access historical training data of players who have granted permission, enabling an overview of player workload and supporting planning of future training sessions and matches.
 
-* **Final Wireframe create in Figma/**
+* **Print screen of final wireflow**
 
   <img width="8050" height="5602" alt="Wireframe Final" src="https://github.com/user-attachments/assets/48e52937-535f-4cc0-8bbc-4c005db89a07" />
 
