@@ -1,0 +1,79 @@
+{
+  "playerId": "1769126887540",
+  "playerName": "Daniel Farahnak",
+  "exportedAt": "2026-01-23T21:35:17.040508",
+  "sessions": [
+    {
+      "playerId": "1769126887540",
+      "avgHr": 179.92698412698414,
+      "duration": 607,
+      "date": "2026-01-22T08:40:07.693014",
+      "lowZonePercentage": 28.378717199242537,
+      "idealZonePercentage": 10.752743156130617,
+      "highZonePercentage": 60.86853964462684,
+      "distanceMeters": 1076.7223271416617,
+      "avgSpeedMps": 1.8106946437740468,
+      "maxSpeedMps": 0.023942726650583494
+    },
+    {
+      "playerId": "1769126887540",
+      "avgHr": 0.0,
+      "duration": 3,
+      "date": "2026-01-22T08:40:33.317537",
+      "lowZonePercentage": 0.0,
+      "idealZonePercentage": 0.0,
+      "highZonePercentage": 0.0,
+      "distanceMeters": 0.0,
+      "avgSpeedMps": 0.0,
+      "maxSpeedMps": 0.0
+    },
+    {
+      "playerId": "1769126887540",
+      "avgHr": 88.00420168067227,
+      "duration": 440,
+      "date": "2026-01-22T08:48:05.837891",
+      "lowZonePercentage": 91.40952920493199,
+      "idealZonePercentage": 8.590470795068017,
+      "highZonePercentage": 0.0,
+      "distanceMeters": 543.1783985250387,
+      "avgSpeedMps": 1.2513555320892356,
+      "maxSpeedMps": 1.6842472679554135
+    },
+    {
+      "playerId": "1769126887540",
+      "avgHr": 0.0,
+      "duration": 6,
+      "date": "2026-01-21T08:57:49.346899",
+      "lowZonePercentage": 0.0,
+      "idealZonePercentage": 0.0,
+      "highZonePercentage": 0.0,
+      "distanceMeters": 34.35994162425432,
+      "avgSpeedMps": 13.049730962496893,
+      "maxSpeedMps": 2.0980076789855957
+    },
+    {
+      "playerId": "1769126887540",
+      "avgHr": 0.0,
+      "duration": 1,
+      "date": "2026-01-21T08:58:36.334950",
+      "lowZonePercentage": 0.0,
+      "idealZonePercentage": 0.0,
+      "highZonePercentage": 0.0,
+      "distanceMeters": 0.0,
+      "avgSpeedMps": 0.0,
+      "maxSpeedMps": 0.0
+    },
+    {
+      "playerId": "1769126887540",
+      "avgHr": 0.0,
+      "duration": 2,
+      "date": "2026-01-21T10:29:57.924768",
+      "lowZonePercentage": 0.0,
+      "idealZonePercentage": 0.0,
+      "highZonePercentage": 0.0,
+      "distanceMeters": 0.0,
+      "avgSpeedMps": 0.0,
+      "maxSpeedMps": 0.0
+    }
+  ]
+}

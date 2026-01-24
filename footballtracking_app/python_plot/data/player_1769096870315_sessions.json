@@ -1,0 +1,79 @@
+{
+  "playerId": "1769096870315",
+  "playerName": "Victor Neumann",
+  "exportedAt": "2026-01-23T21:36:10.821718",
+  "sessions": [
+    {
+      "playerId": "1769096870315",
+      "avgHr": 101.51428571428572,
+      "duration": 95,
+      "date": "2026-01-22T16:50:47.200734",
+      "lowZonePercentage": 88.53615520282186,
+      "idealZonePercentage": 11.46384479717813,
+      "highZonePercentage": 0.0,
+      "distanceMeters": 42.462979430743786,
+      "avgSpeedMps": 0.705681608541103,
+      "maxSpeedMps": 3.9727096557617188
+    },
+    {
+      "playerId": "1769096870315",
+      "avgHr": 0.0,
+      "duration": 6,
+      "date": "2026-01-21T11:13:36.984476",
+      "lowZonePercentage": 0.0,
+      "idealZonePercentage": 0.0,
+      "highZonePercentage": 0.0,
+      "distanceMeters": 0.0,
+      "avgSpeedMps": 0.0,
+      "maxSpeedMps": 0.0
+    },
+    {
+      "playerId": "1769096870315",
+      "avgHr": 0.0,
+      "duration": 5,
+      "date": "2026-01-21T11:13:47.663637",
+      "lowZonePercentage": 0.0,
+      "idealZonePercentage": 0.0,
+      "highZonePercentage": 0.0,
+      "distanceMeters": 0.0,
+      "avgSpeedMps": 0.0,
+      "maxSpeedMps": 0.0
+    },
+    {
+      "playerId": "1769096870315",
+      "avgHr": 0.0,
+      "duration": 22,
+      "date": "2026-01-21T11:14:13.965761",
+      "lowZonePercentage": 0.0,
+      "idealZonePercentage": 0.0,
+      "highZonePercentage": 0.0,
+      "distanceMeters": 44.84736540279532,
+      "avgSpeedMps": 3.8608269113976688,
+      "maxSpeedMps": 0.09169103225940489
+    },
+    {
+      "playerId": "1769096870315",
+      "avgHr": 0.0,
+      "duration": 11,
+      "date": "2026-01-21T11:14:41.557326",
+      "lowZonePercentage": 0.0,
+      "idealZonePercentage": 0.0,
+      "highZonePercentage": 0.0,
+      "distanceMeters": 33.25638638784846,
+      "avgSpeedMps": 5.542731064641409,
+      "maxSpeedMps": 0.048097806167788804
+    },
+    {
+      "playerId": "1769096870315",
+      "avgHr": 129.98556051457075,
+      "duration": 1801,
+      "date": "2026-01-21T11:48:01.147737",
+      "lowZonePercentage": 29.607505120560884,
+      "idealZonePercentage": 58.13774864155186,
+      "highZonePercentage": 12.254690700350553,
+      "distanceMeters": 2664.109596752272,
+      "avgSpeedMps": 1.4987309110954248,
+      "maxSpeedMps": 3.560334639096456
+    }
+  ]
+}

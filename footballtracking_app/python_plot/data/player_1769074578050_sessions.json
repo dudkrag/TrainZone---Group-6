@@ -1,0 +1,55 @@
+{
+  "playerId": "1769074578050",
+  "playerName": "Eduarda",   
+  "exportedAt": "2026-01-22T16:39:49.511666",   
+  "sessions": [
+    {
+      "playerId": "1769074578050",
+      "avgHr": 0.0,
+      "duration": 11,
+      "date": "2026-01-22T10:38:59.525148",
+      "lowZonePercentage": 0.0,
+      "idealZonePercentage": 0.0,
+      "highZonePercentage": 0.0,
+      "distanceMeters": 0.0,
+      "avgSpeedMps": 0.0,
+      "maxSpeedMps": 0.0
+    },
+    {
+      "playerId": "1769074578050",
+      "avgHr": 34.81481481481482,
+      "duration": 77,
+      "date": "2026-01-22T10:44:27.974461",
+      "lowZonePercentage": 100.0,
+      "idealZonePercentage": 0.0,
+      "highZonePercentage": 0.0,
+      "distanceMeters": 0.0,
+      "avgSpeedMps": 0.0,
+      "maxSpeedMps": 0.0
+    },
+    {
+      "playerId": "1769074578050",
+      "avgHr": 120.54545454545455,
+      "duration": 428,
+      "date": "2026-01-22T11:35:15.927830",
+      "lowZonePercentage": 68.01499909785761,
+      "idealZonePercentage": 30.840718262238408,
+      "highZonePercentage": 1.1440211493555565,
+      "distanceMeters": 605.701748707547,
+      "avgSpeedMps": 1.420511281053917,
+      "maxSpeedMps": 7.985957149024974
+    },
+    {
+      "playerId": "1769074578050",
+      "avgHr": 109.78571428571429,
+      "duration": 38,
+      "date": "2026-01-22T16:38:54.067359",
+      "lowZonePercentage": 63.82795340172937,
+      "idealZonePercentage": 30.522423332499237,
+      "highZonePercentage": 5.646842939361081,
+      "distanceMeters": 65.25444053873932,
+      "avgSpeedMps": 3.262885171195526,
+      "maxSpeedMps": 5.622441291809082
+    }
+  ]
+}

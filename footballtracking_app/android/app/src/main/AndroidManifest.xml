@@ -15,7 +15,7 @@
 
 
     <application
-        android:label="teste_4"
+        android:label="TrainZone"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
